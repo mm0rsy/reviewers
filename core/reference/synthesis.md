@@ -65,17 +65,22 @@ Order the output so it reads as a work plan:
 1. `## Verdict` — overall: REQUEST-CHANGES if any reviewer requested changes or any
    CRITICAL/MAJOR survives dedup; otherwise APPROVE-WITH-COMMENTS or APPROVE.
 2. `## Summary` — counts by severity and by reviewer, one-paragraph narrative of the themes.
-3. `## Since last review` — only when Step 0 found a prior iteration. Three lists, each
-   entry `[SEVERITY][scope] title (reviewer) — file` :
+3. `## Since last review` — only when Step 0 found a prior iteration. Four lists, each
+   entry `[SEVERITY][scope] title (reviewers) — file` :
    - **Resolved (n)** — findings open in the prior baseline that no longer appear, whose file
      and reviewer are both still active this iteration (so the absence is a real re-check, not
      a gap in coverage). Include "first seen: iteration NNN".
    - **Persisting (n)** — findings open in the prior baseline that still appear this iteration.
      Include "first seen: iteration NNN" and, if severity or category shifted since then, say so
      (e.g. "severity raised MAJOR→CRITICAL since 002").
+   - **New (n)** — findings this iteration that have no match in the prior baseline. Title
+     line only — their full entries live in the fix plan.
    - **Not re-checked (n)** — findings open in the prior baseline whose file is no longer in the
      change set, or whose reviewer is no longer in the active roster this iteration, so their
      status is genuinely unknown. Never claim these are resolved.
+   "First seen" carries forward: when the prior entry already had a `(persisting since NNN)`
+   tag, keep that NNN; otherwise first seen is the prior iteration's number. This keeps the
+   origin stable across three or more iterations.
    Matching a prior finding to a current one is a judgment call made here, not by the
    reviewers, who never see this history (Step 0): same reviewer + same file + the same
    underlying issue — title wording may differ, and line-number drift alone is never a
@@ -88,8 +93,9 @@ Order the output so it reads as a work plan:
    `--auto` candidate decisions.
 7. `## Fix plan by file` — one subsection per file, findings ordered by severity, each entry:
    `[SEVERITY][scope] title (reviewers) — file:line` + merged suggested fix. When a finding is
-   PERSISTING (Step 3, item 3), append `(persisting since NNN)` to its entry so it's visible
-   without cross-referencing "Since last review". Shared-root-cause findings appear once under
+   PERSISTING (Step 3, item 3), append `(persisting since NNN)` to its entry — NNN is the
+   first-seen iteration from that step — so it's visible without cross-referencing
+   "Since last review". Shared-root-cause findings appear once under
    the file where the fix belongs, with pointers from the others. Module/domain/project-scope
    items without a single natural file go in a final `### Cross-cutting` subsection.
 8. `## Positive observations` — merged from all reports (deduplicated).
