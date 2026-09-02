@@ -123,6 +123,13 @@ npx reviewers --antigravity [path-to-your-project]
 (or `scripts/install.sh --antigravity` from a clone.)
 Workflows appear as `/reviewers-full-review` and `/reviewers-init`.
 
+> **Antigravity is project-scoped, not directory-scoped.** The CLI (`agy`) resumes whatever
+> project it last had open rather than inferring one from your shell's working directory —
+> open the target repo as the active project in the app (or pass `--new-project --add-dir`
+> pointed at it) before triggering a workflow, or it will review the wrong repo. On a large
+> diff, headless synthesis can also exceed the default 5-minute print timeout; pass
+> `--print-timeout` with more headroom.
+
 ## Getting started in a repo
 
 ```
