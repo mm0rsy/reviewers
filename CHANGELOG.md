@@ -3,6 +3,22 @@
 All notable changes to the reviewers plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow semver.
 
+## [0.7.0] — 2026-09-03
+### Added
+- **Baseline**: `- baseline: .reviewers/baseline.md` in review.md's Settings parks specific
+  acknowledged-but-unfixed findings, distinct from the decision ledger — a baseline entry
+  claims a finding is known debt, not that it's acceptable, and covers only that one instance
+  (no bounds enforcement, no coverage of other instances of the same issue). Applied only
+  during synthesis; reviewers never see it. Suppressed findings move to a new
+  `## Suppressed by baseline` section instead of being dropped; entries whose finding was
+  re-checked (file in the change set, reviewer active) and no longer reproduces are flagged
+  stale for pruning — entries whose file wasn't reviewed are never mistaken for fixed — and
+  past-due `Expires` dates are flagged for re-triage. Learning loop (full-review Step 10)
+  now distinguishes "that's intentional"
+  (ledger) from "known issue, not fixing now" (baseline). New
+  `core/reference/baseline.md`; `core/reference/review-schema.md`,
+  `core/reference/synthesis.md`, `core/bodies/{full-review,init}.md` updated.
+
 ## [0.6.0] — 2026-09-03
 ### Added
 - **Incremental re-review**: synthesis now finds the most recent prior iteration and adds a
@@ -64,6 +80,7 @@ Initial public release.
 - Four platforms from one canonical core (`scripts/sync.sh`, CI drift gate): Claude Code,
   GitHub Copilot CLI, openCode, Google Antigravity; installer `scripts/install.sh`.
 
+[0.7.0]: https://github.com/mm0rsy/reviewers/releases/tag/v0.7.0
 [0.6.0]: https://github.com/mm0rsy/reviewers/releases/tag/v0.6.0
 [0.5.0]: https://github.com/mm0rsy/reviewers/releases/tag/v0.5.0
 [0.4.1]: https://github.com/mm0rsy/reviewers/releases/tag/v0.4.1

@@ -45,6 +45,10 @@ Ask the user (briefly, in one round if possible):
   decision. Recommend it; if accepted, create the directory with a `README.md` naming the
   convention (a single-file ledger is also supported for teams that prefer it). Verify the
   chosen path is not gitignored.
+- Mention (don't push) the **baseline** (`{{REF_DIR}}/baseline.md`): for parking specific
+  known-debt findings without judging them acceptable — distinct from the ledger. There's
+  nothing to baseline yet on a fresh setup, so don't recommend enabling it now; it's usually
+  added later, from the learning loop, once a real review surfaces debt worth acknowledging.
 
 ## Step 5 — Write review.md
 Assemble the file at the repository root: a `## Settings` section plus one `## Reviewer:`

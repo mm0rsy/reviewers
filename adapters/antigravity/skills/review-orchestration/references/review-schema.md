@@ -18,6 +18,7 @@ All settings are optional bullet points of the form `- key: value`.
 | `parallel` | `true`    | Allow parallel reviewer dispatch on platforms that support subagents.   |
 | `depth`  | `module`    | How far up the scope ladder reviewers climb: `function` < `file` < `module` < `domain`. Higher = more thorough, slower, costlier (e.g. `domain` for release reviews). Project-level review always runs once during synthesis. |
 | `decisions` | *(none)* | Path to the team's committed **decision ledger** (settled review decisions; see `decision-ledger.md`). A directory (recommended: `.reviewers/decisions/`, one `D-NNN-<slug>.md` file per decision) or a single file with `## D-NNN` sections. When set, reviewers respect settled decisions within their bounds and enforce their limits outside them. |
+| `baseline` | *(none)* | Path to the team's committed **baseline** (acknowledged-but-unfixed findings; see `baseline.md`). A single file with `## B-NNN` sections. Distinct from `decisions`: a baseline parks specific known debt without judging it acceptable, and is applied only during synthesis — reviewers never see it. |
 
 ## Reviewer sections — `## Reviewer: <Name>`
 

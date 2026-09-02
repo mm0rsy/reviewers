@@ -165,6 +165,22 @@ ledger is committed (never gitignore it — the plugin warns if you do), every s
 propagates to the whole team on every platform, reviewable in PRs like any other change. See
 `core/reference/decision-ledger.md` for the entry format.
 
+## Baseline — parking known debt, distinct from the ledger
+
+Add `- baseline: .reviewers/baseline.md` to review.md's Settings to suppress **specific**
+findings the team already knows about but hasn't fixed. This is a different claim from the
+ledger: a ledger entry says "this is deliberate, stop flagging the pattern" (and enforces its
+bounds); a baseline entry says only "this instance is known debt, stop repeating it" — no
+judgment that it's acceptable, and no coverage of other instances of the same issue elsewhere.
+Baseline entries are never shown to reviewers — they report everything they find, and
+suppression happens only during synthesis, so raw findings stay complete. Suppressed findings
+move to a `## Suppressed by baseline` section (never silently dropped), and entries whose finding
+was re-checked and no longer reproduces get flagged as stale, so the baseline doesn't quietly rot
+(an entry whose file simply wasn't in the diff is never mistaken for fixed). Like
+the ledger, entries are written by the learning loop — but from a different acknowledgment
+("known issue, not fixing now" rather than "that's intentional"). See
+`core/reference/baseline.md` for the entry format and the full comparison with the ledger.
+
 ## Install
 
 ### Claude Code

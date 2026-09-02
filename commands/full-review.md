@@ -19,6 +19,7 @@ Reference documents (read them when the step says so — do not improvise their 
 - `${CLAUDE_PLUGIN_ROOT}/skills/review-orchestration/references/finding-format.md` — the report format every reviewer must follow
 - `${CLAUDE_PLUGIN_ROOT}/skills/review-orchestration/references/synthesis.md` — rules for the final review-results.md
 - `${CLAUDE_PLUGIN_ROOT}/skills/review-orchestration/references/decision-ledger.md` — settled-decision semantics (only when review.md links a ledger)
+- `${CLAUDE_PLUGIN_ROOT}/skills/review-orchestration/references/baseline.md` — acknowledged-debt suppression semantics (only when review.md links a baseline)
 
 Arguments given by the user: `$ARGUMENTS`
 - `--auto` → skip the roster confirmation (step 5) and proceed end-to-end without questions.
@@ -32,7 +33,7 @@ stop and tell the user to run `/reviewers:init` to create one (do not invent a r
 
 ## Step 2 — Parse the roster
 Read `${CLAUDE_PLUGIN_ROOT}/skills/review-orchestration/references/review-schema.md`, then parse review.md accordingly: global settings
-(`output`, `base`, `parallel`, `depth`, `decisions`) and every `## Reviewer:` section (files,
+(`output`, `base`, `parallel`, `depth`, `decisions`, `baseline`) and every `## Reviewer:` section (files,
 guidelines, focus, always, severity-floor, depth, free-form prose). Note warnings (unknown keys,
 missing guideline files) — they go in the roster table, they never abort the review.
 If a `decisions:` ledger is configured, read `${CLAUDE_PLUGIN_ROOT}/skills/review-orchestration/references/decision-ledger.md` and load the
@@ -40,6 +41,13 @@ entries — from every `D-*.md` file when the path is a directory, or from the s
 `## D-` sections otherwise (skip entries marked Superseded-by; a missing path is a warning,
 not an error). Warn prominently if the ledger path is matched by .gitignore — an ignored
 ledger is personal, not team, memory.
+If a `baseline:` is configured, read `${CLAUDE_PLUGIN_ROOT}/skills/review-orchestration/references/baseline.md` for the semantics, then load the
+`## B-` entries from **the file at the configured `baseline:` path** — never from the reference
+document itself, which contains an illustrative `## B-003` example that is not a real entry
+(the same caution applies to the ledger's `## D-003` example). A missing path is a warning, not
+an error. Same .gitignore warning applies. Unlike the ledger, baseline entries
+are **not** distributed to reviewers in Step 7 — they're applied only during synthesis
+(Step 8), so hold them for that step rather than the roster build below.
 
 ## Step 3 — Determine the change set
 - Default: `git diff` against the merge-base with the default branch
@@ -103,25 +111,40 @@ conflict/ripple/root-cause analysis, coverage gaps, the once-per-review **projec
 pass** (`Scope: project` observations — the reviewers deliberately stop at domain level),
 and a fix plan grouped by file. When a decision ledger is active, synthesis also applies
 its entries (settled findings, bounds violations, met revisit conditions) per
-`${CLAUDE_PLUGIN_ROOT}/skills/review-orchestration/references/decision-ledger.md`. When a prior iteration exists (synthesis.md Step 0),
-this is also where resolved/persisting/new status against it gets computed — reviewers
-are never told about iteration history, this comparison happens here only.
+`${CLAUDE_PLUGIN_ROOT}/skills/review-orchestration/references/decision-ledger.md`. When a `baseline:` is configured, synthesis also applies
+it (suppressing matched known-debt findings, flagging stale/expired entries) per
+`${CLAUDE_PLUGIN_ROOT}/skills/review-orchestration/references/baseline.md` — reviewers were never shown the baseline, this is the only place
+it's applied. When a prior iteration exists (synthesis.md Step 0), this is also where
+resolved/persisting/new status against it gets computed — reviewers are never told about
+iteration history either, this comparison happens here only.
 
 ## Step 9 — Report back
 Tell the user: the verdict, finding counts by severity, the most important cross-domain
 notes, and the paths of `review-results.md` and the individual reports. When this is a
 re-review (a prior iteration was found), also give the resolved/persisting/new counts so
-the author sees progress since last time at a glance. Do not fix anything — fixing is a
-separate decision that belongs to the author.
+the author sees progress since last time at a glance. When a baseline is active, mention any
+stale or expired entries it flagged — those need a human decision, not silent carry-forward.
+Do not fix anything — fixing is a separate decision that belongs to the author.
 
 ## Step 10 — Learning loop (interactive only; skip entirely with --auto)
-If the author responds to findings with "that's intentional / we've decided this" (now or
-when asked whether any finding should be settled), turn each such rejection into a decision:
-draft a complete ledger entry per `${CLAUDE_PLUGIN_ROOT}/skills/review-orchestration/references/decision-ledger.md` (Decision, Rationale with
-origin `review <NNN>`, Binds, Bounds, Revisit-when — propose bounds narrower than
-"everywhere"), show it, and write it only after the author confirms: a new
-`D-NNN-<slug>.md` file when the ledger is a directory, an appended section when it is a
-single file. If no ledger is configured yet, offer to create one (default
-`.reviewers/decisions/`, one file per decision) and add `- decisions: <path>` to review.md's
-Settings. Remind the author to commit ledger changes — that's how the decision reaches the
-whole team.
+The author's response to a finding tells you which memory it belongs in — don't default both
+kinds of acknowledgment to the ledger:
+
+- **"That's intentional / we've decided this"** → a decision. Draft a complete ledger entry
+  per `${CLAUDE_PLUGIN_ROOT}/skills/review-orchestration/references/decision-ledger.md` (Decision, Rationale with origin `review <NNN>`,
+  Binds, Bounds, Revisit-when — propose bounds narrower than "everywhere"), show it, and
+  write it only after the author confirms: a new `D-NNN-<slug>.md` file when the ledger is a
+  directory, an appended section when it is a single file. If no ledger is configured yet,
+  offer to create one (default `.reviewers/decisions/`, one file per decision) and add
+  `- decisions: <path>` to review.md's Settings.
+- **"Known issue, not fixing it now" / "acknowledged, not this iteration"** → a baseline
+  entry, not a decision — the author is not saying the finding is fine, only that it isn't
+  being addressed yet. Draft a complete entry per `${CLAUDE_PLUGIN_ROOT}/skills/review-orchestration/references/baseline.md` (Finding,
+  Severity, Reason, optional Expires), show it, and append it only after the author confirms.
+  If no baseline is configured yet, offer to create one (default `.reviewers/baseline.md`)
+  and add `- baseline: <path>` to review.md's Settings.
+
+When it's ambiguous which one the author means, ask — don't guess; writing the wrong kind of
+entry misrepresents the team's actual position (baselined debt is not the same claim as a
+settled decision). Remind the author to commit ledger/baseline changes — that's how either
+one reaches the whole team.
