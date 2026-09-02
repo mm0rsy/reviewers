@@ -1,5 +1,6 @@
 # Reviewers — review.md-driven multi-domain code review
 
+[![npm](https://img.shields.io/npm/v/reviewers?logo=npm)](https://www.npmjs.com/package/reviewers)
 [![sync-check](https://github.com/mm0rsy/reviewers/actions/workflows/sync-check.yml/badge.svg)](https://github.com/mm0rsy/reviewers/actions/workflows/sync-check.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
