@@ -26,6 +26,10 @@ writing, …) that review every change the same way, for every team member, on e
 4. The orchestrator synthesizes `.reviews/<NNN>/review-results.md`: findings deduplicated
    across reviewers, **cross-domain checks** (conflicting fixes, ripple effects, shared root
    causes, coverage gaps), and a fix plan grouped by file so fixing takes minimum effort.
+   Re-running after fixes finds the prior iteration automatically and adds a **"Since last
+   review"** section classifying findings as resolved, persisting, or new (plus prior
+   findings whose files weren't re-checked this time) — reviewers never see this history,
+   only synthesis compares iterations.
 
 No reviewers are hardcoded — the roster always comes from `review.md`, so adding a domain is
 a one-file edit, no plugin update.

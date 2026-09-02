@@ -4,6 +4,22 @@ After all reviewer reports exist under `.reviews/<NNN>/`, the orchestrator reads
 and produces `.reviews/<NNN>/review-results.md`. The goal: the author fixes everything with
 the **minimum effort** — one pass per file, no contradictory advice, no duplicate work.
 
+## Step 0 — Load the prior iteration (incremental re-review)
+
+Look under the output root for the numerically highest iteration below `<NNN>` that contains a
+`review-results.md`. If none exists, this is the first review — skip this step and every
+"Since last review" instruction below entirely (no such section appears in the output).
+
+When a prior iteration exists, read its `## Fix plan by file` (and `### Cross-cutting`)
+entries — this is the prior **open-findings baseline**. Findings already listed under that
+iteration's `## Settled by prior decisions` are not part of the baseline: they were settled,
+not open, and reviewers now withhold them by design (`decision-ledger.md`), so they must not
+be reported as "resolved" — they simply don't recur.
+
+Reviewers are never shown this history — each report is written blind to prior iterations, so
+individual reviewer judgment stays uncontaminated. Matching prior findings against the current
+ones is entirely the synthesis step's job, done here in Step 3.
+
 ## Step 1 — Collect and deduplicate
 - Parse every finding from every report (they share the standard format). If a report drifted
   from the canonical severity labels, normalize while parsing (HIGH→MAJOR, MEDIUM→MINOR,
@@ -49,23 +65,49 @@ Order the output so it reads as a work plan:
 1. `## Verdict` — overall: REQUEST-CHANGES if any reviewer requested changes or any
    CRITICAL/MAJOR survives dedup; otherwise APPROVE-WITH-COMMENTS or APPROVE.
 2. `## Summary` — counts by severity and by reviewer, one-paragraph narrative of the themes.
-3. `## Cross-domain notes` — conflicts, ripples, shared root causes, coverage gaps.
-4. `## Project-level observations` — the once-per-review project-scope pass (Step 2, item 6).
-5. `## Settled by prior decisions` — only when a ledger is active and it applied: findings
+3. `## Since last review` — only when Step 0 found a prior iteration. Four lists, each
+   entry `[SEVERITY][scope] title (reviewers) — file` :
+   - **Resolved (n)** — findings open in the prior baseline that no longer appear, whose file
+     and reviewer are both still active this iteration (so the absence is a real re-check, not
+     a gap in coverage). Include "first seen: iteration NNN".
+   - **Persisting (n)** — findings open in the prior baseline that still appear this iteration.
+     Include "first seen: iteration NNN" and, if severity or category shifted since then, say so
+     (e.g. "severity raised MAJOR→CRITICAL since 002").
+   - **New (n)** — findings this iteration that have no match in the prior baseline. Title
+     line only — their full entries live in the fix plan.
+   - **Not re-checked (n)** — findings open in the prior baseline whose file is no longer in the
+     change set, or whose reviewer is no longer in the active roster this iteration, so their
+     status is genuinely unknown. Never claim these are resolved.
+   "First seen" carries forward: when the prior entry already had a `(persisting since NNN)`
+   tag, keep that NNN; otherwise first seen is the prior iteration's number. This keeps the
+   origin stable across three or more iterations.
+   Matching a prior finding to a current one is a judgment call made here, not by the
+   reviewers, who never see this history (Step 0): same reviewer + same file + the same
+   underlying issue — title wording may differ, and line-number drift alone is never a
+   mismatch. When in doubt whether two findings are the same issue, prefer NEW over a false
+   PERSISTING; never invent a persistence that isn't clearly the same defect.
+4. `## Cross-domain notes` — conflicts, ripples, shared root causes, coverage gaps.
+5. `## Project-level observations` — the once-per-review project-scope pass (Step 2, item 6).
+6. `## Settled by prior decisions` — only when a ledger is active and it applied: findings
    settled within decision bounds (with entry IDs), plus any met revisit conditions and
    `--auto` candidate decisions.
-6. `## Fix plan by file` — one subsection per file, findings ordered by severity, each entry:
-   `[SEVERITY][scope] title (reviewers) — file:line` + merged suggested fix. Shared-root-cause
-   findings appear once under the file where the fix belongs, with pointers from the others.
-   Module/domain/project-scope items without a single natural file go in a final
-   `### Cross-cutting` subsection.
-7. `## Positive observations` — merged from all reports (deduplicated).
-8. `## Appendix` — links to each individual reviewer report.
+7. `## Fix plan by file` — one subsection per file, findings ordered by severity, each entry:
+   `[SEVERITY][scope] title (reviewers) — file:line` + merged suggested fix. When a finding is
+   PERSISTING (Step 3, item 3), append `(persisting since NNN)` to its entry — NNN is the
+   first-seen iteration from that step — so it's visible without cross-referencing
+   "Since last review". Shared-root-cause findings appear once under
+   the file where the fix belongs, with pointers from the others. Module/domain/project-scope
+   items without a single natural file go in a final `### Cross-cutting` subsection.
+8. `## Positive observations` — merged from all reports (deduplicated).
+9. `## Appendix` — links to each individual reviewer report.
 
 ## Rules
 - Never drop a finding silently: every finding from every report appears in the fix plan,
-  merged, or is explicitly listed under a cross-domain note that supersedes it.
+  merged, or is explicitly listed under a cross-domain note that supersedes it. The same
+  applies across iterations: a prior finding that stops appearing is reported as Resolved or
+  Not re-checked (Step 3, item 3) — never simply omitted.
 - Do not soften severities during merge; only raise (when a second reviewer confirms impact).
 - The synthesis adds no brand-new findings of its own — its judgments are limited to merging,
-  conflict resolution, and root-cause linking. New concerns noticed during synthesis go under
+  conflict resolution, root-cause linking, and (when a prior iteration exists) matching
+  findings across iterations. New concerns noticed during synthesis go under
   `## Cross-domain notes` clearly marked as orchestrator observations.

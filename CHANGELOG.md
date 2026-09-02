@@ -3,6 +3,18 @@
 All notable changes to the reviewers plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow semver.
 
+## [0.6.0] — 2026-09-03
+### Added
+- **Incremental re-review**: synthesis now finds the most recent prior iteration and adds a
+  `## Since last review` section classifying each finding as Resolved, Persisting, or New
+  (plus a Not re-checked list for prior findings whose file or reviewer wasn't active this
+  time) — entries carrying forward also get a `(persisting since NNN)` tag in the fix plan. Matching
+  is judgment-based (same reviewer + file + underlying issue; line-number drift is not a
+  mismatch) and happens only during synthesis — individual reviewers stay blind to history
+  so their judgment isn't anchored by it. Findings settled by the decision ledger are never
+  reported as "resolved" — they were withheld, not fixed. `core/reference/synthesis.md`,
+  `core/bodies/full-review.md`.
+
 ## [0.5.0] — 2026-09-03
 ### Added
 - **PR/MR integration**: findings post as inline PR/MR review comments plus a summary
@@ -52,6 +64,7 @@ Initial public release.
 - Four platforms from one canonical core (`scripts/sync.sh`, CI drift gate): Claude Code,
   GitHub Copilot CLI, openCode, Google Antigravity; installer `scripts/install.sh`.
 
+[0.6.0]: https://github.com/mm0rsy/reviewers/releases/tag/v0.6.0
 [0.5.0]: https://github.com/mm0rsy/reviewers/releases/tag/v0.5.0
 [0.4.1]: https://github.com/mm0rsy/reviewers/releases/tag/v0.4.1
 [0.4.0]: https://github.com/mm0rsy/reviewers/releases/tag/v0.4.0

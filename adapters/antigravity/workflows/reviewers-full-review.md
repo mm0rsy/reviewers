@@ -97,12 +97,16 @@ conflict/ripple/root-cause analysis, coverage gaps, the once-per-review **projec
 pass** (`Scope: project` observations — the reviewers deliberately stop at domain level),
 and a fix plan grouped by file. When a decision ledger is active, synthesis also applies
 its entries (settled findings, bounds violations, met revisit conditions) per
-`.agents/skills/review-orchestration/references/decision-ledger.md`.
+`.agents/skills/review-orchestration/references/decision-ledger.md`. When a prior iteration exists (synthesis.md Step 0),
+this is also where resolved/persisting/new status against it gets computed — reviewers
+are never told about iteration history, this comparison happens here only.
 
 ## Step 9 — Report back
 Tell the user: the verdict, finding counts by severity, the most important cross-domain
-notes, and the paths of `review-results.md` and the individual reports. Do not fix anything —
-fixing is a separate decision that belongs to the author.
+notes, and the paths of `review-results.md` and the individual reports. When this is a
+re-review (a prior iteration was found), also give the resolved/persisting/new counts so
+the author sees progress since last time at a glance. Do not fix anything — fixing is a
+separate decision that belongs to the author.
 
 ## Step 10 — Learning loop (interactive only; skip entirely with --auto)
 If the author responds to findings with "that's intentional / we've decided this" (now or
