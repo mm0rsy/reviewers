@@ -66,6 +66,10 @@ copilot plugin install reviewers@reviewers-marketplace
 
 ### openCode
 ```
+npx reviewers --opencode [--global] [path-to-your-project]
+```
+or from a clone:
+```
 git clone https://github.com/mm0rsy/reviewers.git && cd reviewers
 scripts/install.sh --opencode [--global] [path-to-your-project]
 ```
@@ -73,8 +77,9 @@ Commands appear as `/reviewers/full-review` and `/reviewers/init`.
 
 ### Google Antigravity
 ```
-scripts/install.sh --antigravity [path-to-your-project]
+npx reviewers --antigravity [path-to-your-project]
 ```
+(or `scripts/install.sh --antigravity` from a clone.)
 Workflows appear as `/reviewers-full-review` and `/reviewers-init`.
 
 ## Getting started in a repo

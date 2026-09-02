@@ -1,0 +1,47 @@
+{
+  "name": "reviewers",
+  "version": "0.4.1",
+  "description": "review.md-driven multi-domain code review for Claude Code, GitHub Copilot CLI, openCode, and Google Antigravity — one committed team contract, dynamic domain reviewers, cross-domain synthesis, decision ledger. This package is the installer: npx reviewers --opencode",
+  "bin": {
+    "reviewers": "bin/reviewers.js"
+  },
+  "files": [
+    "bin/",
+    "adapters/",
+    "scripts/install.sh",
+    "review.md.example",
+    "CHANGELOG.md",
+    "NOTICE"
+  ],
+  "scripts": {},
+  "os": [
+    "linux",
+    "darwin"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "Apache-2.0",
+  "author": "Mohamed Morsy <mo-morsy@outlook.com>",
+  "homepage": "https://github.com/mm0rsy/reviewers",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mm0rsy/reviewers.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mm0rsy/reviewers/issues"
+  },
+  "keywords": [
+    "code-review",
+    "ai-code-review",
+    "review.md",
+    "multi-agent",
+    "claude-code",
+    "claude-code-plugin",
+    "copilot",
+    "opencode",
+    "antigravity",
+    "team-standards",
+    "code-quality"
+  ]
+}

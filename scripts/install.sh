@@ -25,7 +25,7 @@ for arg in "$@"; do
     --all) DO_OPENCODE=true; DO_ANTIGRAVITY=true; DO_CLAUDE=true; DO_COPILOT=true ;;
     --global) GLOBAL=true ;;
     --link) LINK=true ;;
-    -h|--help) grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) grep '^#' "$0" | grep -v '^#!' | sed 's/^# \{0,1\}//'; exit 0 ;;
     -*) echo "unknown flag: $arg" >&2; exit 2 ;;
     *) TARGET="$arg" ;;
   esac
@@ -71,7 +71,7 @@ fi
 if $DO_CLAUDE; then
   cat <<EOF
 Claude Code installs natively from this repo (no file copying needed):
-  /plugin marketplace add $ROOT     (or: /plugin marketplace add <github-owner>/<repo>)
+  /plugin marketplace add $ROOT     (or: /plugin marketplace add mm0rsy/reviewers)
   /plugin install reviewers@reviewers-marketplace
 Commands: /reviewers:full-review, /reviewers:init
 EOF
@@ -80,7 +80,7 @@ fi
 if $DO_COPILOT; then
   cat <<EOF
 GitHub Copilot CLI installs natively from this repo's marketplace:
-  copilot plugin marketplace add <github-owner>/<repo>
+  copilot plugin marketplace add mm0rsy/reviewers
   copilot plugin install reviewers@reviewers-marketplace
 EOF
 fi
