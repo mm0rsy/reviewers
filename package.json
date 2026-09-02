@@ -1,6 +1,6 @@
 {
   "name": "reviewers",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "review.md-driven multi-domain code review for Claude Code, GitHub Copilot CLI, openCode, and Google Antigravity — one committed team contract, dynamic domain reviewers, cross-domain synthesis, decision ledger. This package is the installer: npx reviewers --opencode",
   "bin": {
     "reviewers": "bin/reviewers.js"

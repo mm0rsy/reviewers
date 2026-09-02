@@ -3,6 +3,16 @@
 All notable changes to the reviewers plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow semver.
 
+## [0.5.0] — 2026-09-03
+### Added
+- **PR/MR integration**: findings post as inline PR/MR review comments plus a summary
+  comment, on both GitHub and GitLab (`scripts/ci/`, `action.yml`,
+  `gitlab/reviewers.gitlab-ci.yml`). Built on `gh`/`glab` rather than hand-rolled HTTP.
+  Idempotent — a hidden marker keyed to reviewer+file+line+title skips re-posting findings
+  still open on re-runs; the summary comment updates in place instead of stacking.
+- **Severity gate**: fails the CI job when findings at or above a configurable threshold
+  (`critical` default; `major`/`minor`/`none`) are found — `scripts/ci/severity-gate.mjs`.
+
 ## [0.4.1] — 2026-09-02
 ### Added
 - `decisions:` may point at a **directory** (recommended: `.reviewers/decisions/`, one
@@ -42,6 +52,7 @@ Initial public release.
 - Four platforms from one canonical core (`scripts/sync.sh`, CI drift gate): Claude Code,
   GitHub Copilot CLI, openCode, Google Antigravity; installer `scripts/install.sh`.
 
+[0.5.0]: https://github.com/mm0rsy/reviewers/releases/tag/v0.5.0
 [0.4.1]: https://github.com/mm0rsy/reviewers/releases/tag/v0.4.1
 [0.4.0]: https://github.com/mm0rsy/reviewers/releases/tag/v0.4.0
 [0.3.1]: https://github.com/mm0rsy/reviewers/releases/tag/v0.3.1

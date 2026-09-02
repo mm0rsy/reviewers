@@ -1,0 +1,76 @@
+name: release
+
+# Bumping package.json's version in a PR and merging it to master is what ships a release:
+# this job notices the version changed, tags it, and creates a GitHub release. That release
+# publish event is what triggers npm-publish.yml. No version number is ever guessed —
+# whoever writes the PR decides the bump. Safe by construction: every value below comes
+# from files in this checkout (package.json, CHANGELOG.md), never from github.event.*.
+on:
+  push:
+    branches: [master]
+    paths: [package.json]
+
+permissions:
+  contents: write
+
+jobs:
+  tag-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check whether the version actually changed
+        id: check
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v$VERSION"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "tag $TAG already exists — not a new version, skipping"
+            echo "new=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Guard — package.json and plugin.json versions agree
+        if: steps.check.outputs.new == 'true'
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          PLUGIN=$(node -p "require('./.claude-plugin/plugin.json').version")
+          if [ "$PKG" != "$PLUGIN" ]; then
+            echo "version mismatch: package.json=$PKG plugin.json=$PLUGIN" >&2
+            exit 1
+          fi
+
+      - name: Extract changelog section for this version
+        if: steps.check.outputs.new == 'true'
+        id: notes
+        env:
+          VERSION: ${{ steps.check.outputs.version }}
+        run: |
+          NOTES=$(awk -v ver="## [$VERSION]" '
+            $0 ~ "^## \\[" { if (found) exit; if (index($0, ver) == 1) { found=1; next } }
+            found { print }
+          ' CHANGELOG.md)
+          if [ -z "$NOTES" ]; then
+            NOTES="See CHANGELOG.md."
+          fi
+          {
+            echo "notes<<NOTES_EOF"
+            echo "$NOTES"
+            echo "NOTES_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create tag + GitHub release
+        if: steps.check.outputs.new == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.check.outputs.tag }}
+          NOTES: ${{ steps.notes.outputs.notes }}
+        run: |
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --notes "$NOTES"
