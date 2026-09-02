@@ -1,0 +1,101 @@
+name: 'Reviewers'
+description: >-
+  Runs the review.md-driven reviewers plugin against a pull request, posts findings as inline
+  PR comments, and fails the job when a configurable severity threshold is met.
+author: 'Mohamed Morsy'
+branding:
+  icon: 'check-circle'
+  color: 'purple'
+
+inputs:
+  anthropic-api-key:
+    description: 'Anthropic API key for the Claude Code CLI that runs the review.'
+    required: true
+  pr-number:
+    description: 'PR number to review. Defaults to the triggering pull_request event.'
+    required: false
+    default: ${{ github.event.pull_request.number }}
+  fail-on:
+    description: 'Minimum severity that fails the job: critical | major | minor | none.'
+    required: false
+    default: 'critical'
+  model:
+    description: 'Claude model to run the review with.'
+    required: false
+    default: 'sonnet'
+  post-comments:
+    description: 'Post findings as inline PR review comments.'
+    required: false
+    default: 'true'
+  github-token:
+    description: 'Token used to install the plugin and post comments. Needs pull-requests: write.'
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Claude Code CLI
+      shell: bash
+      run: npm install -g @anthropic-ai/claude-code
+
+    - name: Install the reviewers plugin
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        claude plugin marketplace add "$ACTION_PATH"
+        claude plugin install reviewers@reviewers-marketplace -s project -y
+
+    - name: Run the review
+      shell: bash
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+        MODEL: ${{ inputs.model }}
+      run: |
+        claude -p "/reviewers:full-review --auto $PR_NUMBER" \
+          --model "$MODEL" \
+          --dangerously-skip-permissions \
+          --max-turns 60
+
+    - name: Locate the iteration directory
+      id: iter
+      shell: bash
+      run: |
+        OUTPUT_ROOT=".reviews"
+        if [ ! -d "$OUTPUT_ROOT" ]; then
+          echo "::error::no $OUTPUT_ROOT/ directory produced by the review — check the run step's log"
+          exit 1
+        fi
+        LATEST=$(find "$OUTPUT_ROOT" -maxdepth 1 -mindepth 1 -type d | sort | tail -1)
+        if [ -z "$LATEST" ]; then
+          echo "::error::$OUTPUT_ROOT/ exists but has no iteration subdirectory"
+          exit 1
+        fi
+        echo "dir=$LATEST" >> "$GITHUB_OUTPUT"
+
+    - name: Post PR comments
+      if: inputs.post-comments == 'true'
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        GH_TOKEN: ${{ inputs.github-token }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+        ITER_DIR: ${{ steps.iter.outputs.dir }}
+      run: node "$ACTION_PATH/scripts/ci/post-comments.mjs" "$ITER_DIR" github
+
+    - name: Severity gate
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        FAIL_ON: ${{ inputs.fail-on }}
+        ITER_DIR: ${{ steps.iter.outputs.dir }}
+      run: node "$ACTION_PATH/scripts/ci/severity-gate.mjs" "$ITER_DIR" "$FAIL_ON"

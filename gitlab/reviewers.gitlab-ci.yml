@@ -1,0 +1,70 @@
+# Includable GitLab CI job for the reviewers plugin. Mirrors action.yml's pipeline for GitHub.
+#
+# Usage, in the consuming project's .gitlab-ci.yml:
+#
+#   include:
+#     - remote: 'https://raw.githubusercontent.com/mm0rsy/reviewers/main/gitlab/reviewers.gitlab-ci.yml'
+#
+#   reviewers:
+#     extends: .reviewers
+#     rules:
+#       - if: $CI_MERGE_REQUEST_IID
+#
+# Required CI/CD variables (Settings > CI/CD > Variables):
+#   ANTHROPIC_API_KEY   Claude Code CLI credential.
+#   GITLAB_TOKEN        Project/group access token, API scope, used to post MR discussions.
+#                        Deliberately not CI_JOB_TOKEN — its permissions for writing MR
+#                        discussions are inconsistent across GitLab versions/settings.
+#
+# Optional variables (override via `variables:` on the extending job):
+#   REVIEWERS_FAIL_ON     critical (default) | major | minor | none
+#   REVIEWERS_MODEL        sonnet (default)
+#   REVIEWERS_POST_COMMENTS  "true" (default) | "false"
+#   REVIEWERS_REF          git ref of mm0rsy/reviewers to install — main (default)
+
+.reviewers:
+  image: node:20
+  variables:
+    REVIEWERS_FAIL_ON: 'critical'
+    REVIEWERS_MODEL: 'sonnet'
+    REVIEWERS_POST_COMMENTS: 'true'
+    REVIEWERS_REF: 'main'
+    GIT_DEPTH: '0'
+  before_script:
+    # glab: no apt/apk package reliably present across generic CI base images, and the
+    # only GitLab-badged "officially supported" cross-platform method (Homebrew) isn't
+    # preinstalled either — so resolve the latest release via GitLab's own release API and
+    # pull the matching official binary tarball directly.
+    - apt-get update -qq && apt-get install -qq -y curl tar >/dev/null
+    - >
+      GLAB_TAG=$(curl -sf "https://gitlab.com/api/v4/projects/gitlab-org%2Fcli/releases/permalink/latest"
+      | node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).tag_name")
+    - GLAB_VERSION="${GLAB_TAG#v}"
+    - >
+      curl -sfL "https://gitlab.com/gitlab-org/cli/-/releases/${GLAB_TAG}/downloads/glab_${GLAB_VERSION}_linux_amd64.tar.gz"
+      -o /tmp/glab.tar.gz
+    - tar -xzf /tmp/glab.tar.gz -C /tmp
+    - install -m 755 /tmp/bin/glab /usr/local/bin/glab
+    - glab --version
+    # Claude Code CLI.
+    - npm install -g @anthropic-ai/claude-code
+    # Plugin install — no automatic action-repo checkout the way GitHub composite actions get,
+    # so clone the public reviewers repo and register it as a local marketplace.
+    - git clone --depth 1 --branch "$REVIEWERS_REF" https://github.com/mm0rsy/reviewers.git /tmp/reviewers
+    - claude plugin marketplace add /tmp/reviewers
+    - claude plugin install reviewers@reviewers-marketplace -s project -y
+  script:
+    - export ANTHROPIC_API_KEY
+    - claude -p "/reviewers:full-review --auto $CI_MERGE_REQUEST_IID" --model "$REVIEWERS_MODEL" --dangerously-skip-permissions --max-turns 60
+    - >
+      ITER_DIR=$(find .reviews -maxdepth 1 -mindepth 1 -type d | sort | tail -1)
+    - |
+      if [ -z "$ITER_DIR" ]; then
+        echo "no .reviews/ iteration directory produced by the review — check the run step's log"
+        exit 1
+      fi
+    - |
+      if [ "$REVIEWERS_POST_COMMENTS" = "true" ]; then
+        node /tmp/reviewers/scripts/ci/post-comments.mjs "$ITER_DIR" gitlab
+      fi
+    - node /tmp/reviewers/scripts/ci/severity-gate.mjs "$ITER_DIR" "$REVIEWERS_FAIL_ON"
