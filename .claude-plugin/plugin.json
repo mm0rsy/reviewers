@@ -1,10 +1,12 @@
 {
   "name": "reviewers",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Domain-intelligent, cross-domain team code review driven by a shared review.md contract. Dynamic reviewer roster per domain/file-type, per-reviewer reports, and a cross-domain synthesized review-results.md.",
   "author": {
     "name": "Mohamed Morsy",
     "email": "mo-morsy@outlook.com"
   },
+  "homepage": "https://github.com/mm0rsy/reviewers",
+  "repository": "https://github.com/mm0rsy/reviewers",
   "keywords": ["code-review", "multi-agent", "team-standards", "review.md"]
 }

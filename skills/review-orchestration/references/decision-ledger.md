@@ -5,20 +5,41 @@ settled: trade-offs accepted deliberately, exceptions to guidelines, architectur
 that would otherwise look like defects to a fresh reviewer. It exists so settled matters are
 never re-litigated — and so their *limits* are enforced.
 
-It is activated by linking it from review.md's `## Settings`:
+It is activated by linking it from review.md's `## Settings` — as a directory (one decision
+per file) or a single file:
 
 ```markdown
-- decisions: docs/review-decisions.md
+- decisions: .reviewers/decisions/
 ```
 
-No `decisions:` setting (or a missing file) → the feature is simply inactive. Like review.md
-itself, the ledger must be committed — that is what makes it team memory that reaches every
-member on every platform. Never place it under the review output directory (typically
-gitignored and local).
+No `decisions:` setting (or a missing path) → the feature is simply inactive.
+
+## Storage: single file or directory
+
+The `decisions:` path may be either:
+
+- **A single file** (e.g. `docs/review-decisions.md`) — one `## D-NNN` section per decision.
+  Simplest to read end-to-end; right for small teams and short ledgers.
+- **A directory** (e.g. `.reviewers/decisions/` — the recommended default for new setups) —
+  one decision per file, named `D-NNN-<short-slug>.md` (e.g. `D-003-reporting-direct-db.md`).
+  Each file holds exactly one entry in the same format (its `## D-NNN` heading included).
+  One-per-file means parallel branches settling decisions merge cleanly, and each decision
+  carries its own git history. Non-matching files in the directory are ignored.
+
+A path that is a directory (or ends with `/`) selects directory mode; otherwise file mode.
+Both modes share the entry format below and identical semantics.
+
+Like review.md itself, the ledger must be **committed** — that is what makes it team memory
+that reaches every member on every platform. If the configured path is matched by
+.gitignore, warn prominently: an ignored ledger is personal, not team, memory — reviews
+would silently behave differently per machine. Never place it under the review output
+directory (typically gitignored and local).
 
 ## Entry format
 
-One `## D-NNN` section per decision, appended in order, IDs never reused:
+One `## D-NNN` section per decision (one such section per file in directory mode), IDs
+never reused. If parallel branches minted the same ID, renumber one side at merge — the
+per-file layout makes this a rename, not a textual conflict:
 
 ```markdown
 ## D-003 — Direct DB access from reporting module (2026-09-02)
@@ -62,7 +83,8 @@ Free-form prose after the bullets is allowed and passed along verbatim.
 Entries are written by hand at any time, or captured at the end of an interactive review:
 when the author rejects a finding as *intentional* ("we know — that's deliberate"), the
 orchestrator drafts a complete entry (Decision, Rationale with origin, Binds, Bounds,
-Revisit-when) and appends it **only after the author confirms** — the ledger is part of the
+Revisit-when) and writes it — a new `D-NNN-<slug>.md` file in directory mode, an appended
+section in file mode — **only after the author confirms** — the ledger is part of the
 team contract, and amending it is the team's call, not the tool's. Suggest bounds narrower
 than the author's first instinct; "everywhere, forever" is rarely the real decision.
 

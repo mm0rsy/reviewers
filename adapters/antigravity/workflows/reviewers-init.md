@@ -43,10 +43,12 @@ Ask the user (briefly, in one round if possible):
 - Where their coding guidelines / naming convention docs live (offer the candidates found in
   step 2), noting that linked guideline content is enforced verbatim during reviews.
 - Whether reviews should be committed or ignored (offer to add `.reviews/` to .gitignore).
-- Whether to enable the **decision ledger** (`decisions: docs/review-decisions.md` — see
-  `.agents/skills/review-orchestration/references/decision-ledger.md`): a committed file of settled review decisions that stops
-  re-litigating them and enforces their bounds. Recommend it; if accepted, create the file
-  with a short header comment and no entries.
+- Whether to enable the **decision ledger** (`decisions: .reviewers/decisions/` — see
+  `.agents/skills/review-orchestration/references/decision-ledger.md`): a committed record of settled review decisions that
+  stops re-litigating them and enforces their bounds, one `D-NNN-<slug>.md` file per
+  decision. Recommend it; if accepted, create the directory with a `README.md` naming the
+  convention (a single-file ledger is also supported for teams that prefer it). Verify the
+  chosen path is not gitignored.
 
 ## Step 5 — Write review.md
 Assemble the file at the repository root: a `## Settings` section plus one `## Reviewer:`

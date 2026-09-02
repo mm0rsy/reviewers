@@ -29,9 +29,11 @@ Read `.agents/skills/review-orchestration/references/review-schema.md`, then par
 (`output`, `base`, `parallel`, `depth`, `decisions`) and every `## Reviewer:` section (files,
 guidelines, focus, always, severity-floor, depth, free-form prose). Note warnings (unknown keys,
 missing guideline files) — they go in the roster table, they never abort the review.
-If a `decisions:` ledger is configured, read `.agents/skills/review-orchestration/references/decision-ledger.md` and parse the
-ledger file's entries (skip entries marked Superseded-by; a missing ledger file is a warning,
-not an error).
+If a `decisions:` ledger is configured, read `.agents/skills/review-orchestration/references/decision-ledger.md` and load the
+entries — from every `D-*.md` file when the path is a directory, or from the single file's
+`## D-` sections otherwise (skip entries marked Superseded-by; a missing path is a warning,
+not an error). Warn prominently if the ledger path is matched by .gitignore — an ignored
+ledger is personal, not team, memory.
 
 ## Step 3 — Determine the change set
 - Default: `git diff` against the merge-base with the default branch
@@ -107,7 +109,9 @@ If the author responds to findings with "that's intentional / we've decided this
 when asked whether any finding should be settled), turn each such rejection into a decision:
 draft a complete ledger entry per `.agents/skills/review-orchestration/references/decision-ledger.md` (Decision, Rationale with
 origin `review <NNN>`, Binds, Bounds, Revisit-when — propose bounds narrower than
-"everywhere"), show it, and append it to the ledger file only after the author confirms.
-If no ledger is configured yet, offer to create one (default `docs/review-decisions.md`) and
-add `- decisions: <path>` to review.md's Settings. Remind the author to commit ledger
-changes — that's how the decision reaches the whole team.
+"everywhere"), show it, and write it only after the author confirms: a new
+`D-NNN-<slug>.md` file when the ledger is a directory, an appended section when it is a
+single file. If no ledger is configured yet, offer to create one (default
+`.reviewers/decisions/`, one file per decision) and add `- decisions: <path>` to review.md's
+Settings. Remind the author to commit ledger changes — that's how the decision reaches the
+whole team.
