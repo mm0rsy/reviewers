@@ -26,9 +26,45 @@ writing, …) that review every change the same way, for every team member, on e
 No reviewers are hardcoded — the roster always comes from `review.md`, so adding a domain is
 a one-file edit, no plugin update.
 
-**See it before installing it:** [`examples/`](examples/) holds one complete, genuine review —
-the contract, a decision ledger, an individual reviewer report, and the synthesized
-`review-results.md` with cross-domain notes and settled-decision handling.
+## What the output looks like
+
+Excerpted **verbatim** from [`examples/review-results.md`](examples/review-results.md) — a
+genuine `--auto` run against a sample repo with deliberately planted bugs (the "secret" is a
+sanitized fake). Three reviewers (Backend, DevOps, Technical Writing) ran independently;
+this is the synthesis:
+
+> ## Verdict
+> **REQUEST-CHANGES** — 2 CRITICAL findings survive dedup (the same live-looking secret
+> hardcoded in two files), plus 5 MAJOR findings including a broken public API that the new
+> README section documents incorrectly.
+>
+> ## Cross-domain notes
+> 1. **Shared root cause — same secret hardcoded twice.** Backend flagged
+>    `API_KEY = "sk-live-0000EXAMPLE0000"` in `src/orders.py:3` (CRITICAL); DevOps flagged
+>    the identical value baked into `Dockerfile:4` via `ENV API_KEY=...` (CRITICAL). […]
+>    A single upstream fix resolves both CRITICALs […] and **rotate the key** — it must be
+>    treated as compromised regardless of which fix lands first.
+> 2. **Ripple effect — API rename broke the docs, and the style guide already prescribes
+>    the fix.** […] Backend's "banned abbreviation" finding, the README's
+>    outdated-but-correct name, and Technical Writing's broken-doc finding all point to the
+>    **same single fix**: rename the function back to `calculate_total` […] rather than
+>    fixing the code and docs in two unsynchronized passes.
+> 3. **Coverage gap — no always-on security reviewer.** Both hardcoded-secret findings were
+>    only caught because the secret happened to land in files already matched by Backend's
+>    and DevOps's globs. […] Recommend adding an `always: true` Security reviewer.
+>
+> ## Settled by prior decisions
+> - **D-001** (floating `python:latest` base tag, bounds: Dockerfile at repo root) —
+>   correctly not re-raised by DevOps; the base-image state is unchanged and stays within
+>   bounds.
+> - **Revisit candidate: D-002** […] Flagged again for a human to supersede D-002 or fix
+>   the condition — the orchestrator does not reopen decisions automatically, and repeating
+>   this note every iteration without action is a sign the decision needs owner attention.
+
+No single-domain reviewer produces notes like these — they come from the synthesis pass
+reading all reports against each other and the decision ledger. The full run is committed in
+[`examples/`](examples/): the `review.md` contract, the ledger entries, an individual
+reviewer report, and the complete `review-results.md` with the per-file fix plan.
 
 ## The decision ledger — a review that remembers
 
