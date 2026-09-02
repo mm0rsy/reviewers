@@ -20,6 +20,9 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
+      # Trusted publishing (OIDC) needs npm >= 11.5.1; Node 22 bundles an older npm
+      - run: npm install -g npm@latest
+
       - name: Guard — generated files in sync
         run: bash scripts/sync.sh --check
 
@@ -39,7 +42,5 @@ jobs:
             exit 1
           fi
 
-      - name: Publish to npm
+      - name: Publish to npm (trusted publishing — OIDC, no token)
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
