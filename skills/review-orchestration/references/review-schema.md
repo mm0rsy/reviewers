@@ -54,7 +54,10 @@ Two rules apply when inlining a directory of ADRs:
   superseded ADR makes the reviewer defend architecture the team already abandoned. A
   `Proposed`/`Draft` ADR is not yet binding either: inline it, but tell the reviewer it is
   proposed, so it informs judgment without being cited as a violation. Documents with no
-  detectable status are treated as in force.
+  detectable status are treated as in force — most real ADRs record status only in prose, and
+  dropping every unparseable one would quietly gut the guideline set. The cost is that a
+  superseded ADR written without a status marker still gets enforced; when that happens, name
+  the binding ADRs individually instead of the directory.
 - **Watch the volume.** Guideline content is inlined verbatim, so a directory of 60 ADRs is
   60 documents in one prompt. When a directory yields more than ~15 in-force documents, warn
   in the roster table and suggest either naming the specific ADRs that bind this reviewer, or

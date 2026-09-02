@@ -17,10 +17,13 @@ every such reviewer the same map. Derive it from tracked files so ignored, vendo
 generated content disappears for free:
 
 ```bash
-git ls-files | cut -d/ -f1-3 | sort | uniq -c | sort -rn
+git ls-files | sed 's|[^/]*$||; s|/$||; s|^$|(root)|' | cut -d/ -f1-3 | sort | uniq -c | sort -rn
 ```
 
-That yields directories to depth 3 with tracked-file counts. Then:
+That strips each filename, truncates to depth 3, and counts — yielding tracked-file counts per
+directory, with root-level files grouped as `(root)`. Strip the filename *before* truncating:
+cutting the path directly would leave files that sit at exactly depth 3 (`src/api/orders.py`)
+masquerading as directories in the map. Then:
 
 - **Prune noise** that is tracked anyway: `node_modules/`, `vendor/`, `dist/`, `build/`,
   `target/`, `.venv/`, `__pycache__/`, minified bundles, lockfiles, snapshot/fixture dumps.

@@ -36,8 +36,9 @@ Fill the meta-template deliberately:
   hygiene; for Go: goroutine/context leaks, error wrapping; for Rust: unsafe blocks,
   unwrap/expect discipline, lifetime-driven API design). Draft from your domain knowledge,
   then let the user reorder/edit.
-- **optional keys**: propose `always`, `severity-floor`, or `depth` only when the domain
-  warrants it, and say why.
+- **optional keys**: propose `always`, `severity-floor`, `depth`, or `repo-map` only when the
+  domain warrants it, and say why. `repo-map: true` earns its prompt cost only for domains
+  that judge structure (layering, dependency direction) — not for file-level domains.
 - **prose lore**: ask for constraints the keys can't express (target hardware, protocol
   versions, legacy zones).
 Interview in ONE round if possible: present a complete draft and ask for corrections,
