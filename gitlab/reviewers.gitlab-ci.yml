@@ -10,6 +10,11 @@
 #     rules:
 #       - if: $CI_MERGE_REQUEST_IID
 #
+# Prerequisite: the `glab` CLI must be available in the job image — this job does not
+# install tools on your behalf. Use an image that ships it, or add it via your image's
+# package manager (e.g. `apk add glab` on Alpine); all options:
+# https://gitlab.com/gitlab-org/cli#installation
+#
 # Required CI/CD variables (Settings > CI/CD > Variables):
 #   ANTHROPIC_API_KEY   Claude Code CLI credential.
 #   GITLAB_TOKEN        Project/group access token, API scope, used to post MR discussions.
@@ -31,20 +36,16 @@
     REVIEWERS_REF: 'main'
     GIT_DEPTH: '0'
   before_script:
-    # glab: no apt/apk package reliably present across generic CI base images, and the
-    # only GitLab-badged "officially supported" cross-platform method (Homebrew) isn't
-    # preinstalled either — so resolve the latest release via GitLab's own release API and
-    # pull the matching official binary tarball directly.
-    - apt-get update -qq && apt-get install -qq -y curl tar >/dev/null
-    - >
-      GLAB_TAG=$(curl -sf "https://gitlab.com/api/v4/projects/gitlab-org%2Fcli/releases/permalink/latest"
-      | node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).tag_name")
-    - GLAB_VERSION="${GLAB_TAG#v}"
-    - >
-      curl -sfL "https://gitlab.com/gitlab-org/cli/-/releases/${GLAB_TAG}/downloads/glab_${GLAB_VERSION}_linux_amd64.tar.gz"
-      -o /tmp/glab.tar.gz
-    - tar -xzf /tmp/glab.tar.gz -C /tmp
-    - install -m 755 /tmp/bin/glab /usr/local/bin/glab
+    # glab is a dependency of this job (comment posting + diff fetching), not something it
+    # installs for you — fail fast with instructions when it's missing.
+    - |
+      if ! command -v glab >/dev/null 2>&1; then
+        echo "ERROR: the glab CLI is not available in this job's image."
+        echo "The reviewers job uses glab to fetch the MR diff and post MR comments."
+        echo "Provide it in your image (e.g. 'apk add glab' on Alpine-based images);"
+        echo "all install options: https://gitlab.com/gitlab-org/cli#installation"
+        exit 1
+      fi
     - glab --version
     # Claude Code CLI.
     - npm install -g @anthropic-ai/claude-code

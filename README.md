@@ -130,6 +130,10 @@ reviewers:
     - if: $CI_MERGE_REQUEST_IID
 ```
 
+**Prerequisite**: your job image must provide the [`glab` CLI](https://gitlab.com/gitlab-org/cli#installation)
+(e.g. `apk add glab` on Alpine-based images) — the job checks for it and fails fast with
+instructions if it's missing, rather than installing tools on your behalf.
+
 Set `ANTHROPIC_API_KEY` and `GITLAB_TOKEN` (a project/group access token with `api` scope —
 not `CI_JOB_TOKEN`, whose MR-discussion permissions are inconsistent across GitLab
 versions/settings) as CI/CD variables. See

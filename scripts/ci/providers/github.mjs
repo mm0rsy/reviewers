@@ -8,7 +8,7 @@
 "use strict";
 
 import { spawnSync } from "node:child_process";
-import { findingId, extractMarker, inlineCommentBody } from "../comment-format.mjs";
+import { findingId, extractMarker, inlineCommentBody, SUMMARY_MARKER } from "../comment-format.mjs";
 
 export function readEnv() {
   const { GITHUB_REPOSITORY, PR_NUMBER } = process.env;
@@ -29,7 +29,9 @@ function ghApi(path, { method, jsonBody, paginateSlurp } = {}) {
     encoding: "utf8",
   });
   if (res.status !== 0) {
-    const err = new Error(`gh ${args.join(" ")} failed: ${res.stderr || res.stdout}`);
+    // res.error covers the binary-missing case (status is null, stderr empty).
+    const detail = res.error?.message || res.stderr || res.stdout;
+    const err = new Error(`gh ${args.join(" ")} failed: ${detail}`);
     err.status = res.status;
     throw err;
   }
@@ -73,8 +75,10 @@ export async function postAll({ owner, repo, prNumber }, { findings }) {
         },
       });
       postedCount++;
-    } catch {
-      // Line isn't part of the diff hunk — folded into the summary comment instead.
+    } catch (e) {
+      // Typically the line isn't part of the diff hunk — folded into the summary
+      // comment instead, but log why so a systemic failure (bad token, etc.) is visible.
+      console.warn(`inline comment failed for ${f.path}:${f.line} — ${e.message}`);
       failed.push(f);
     }
   }
@@ -83,8 +87,28 @@ export async function postAll({ owner, repo, prNumber }, { findings }) {
 }
 
 export async function postSummary({ owner, repo, prNumber }, body) {
-  ghApi(`repos/${owner}/${repo}/issues/${prNumber}/comments`, {
-    method: "POST",
-    jsonBody: { body },
-  });
+  // Update the previous run's summary in place (found via SUMMARY_MARKER) instead of
+  // stacking a new comment per run.
+  const pages =
+    ghApi(`repos/${owner}/${repo}/issues/${prNumber}/comments?per_page=100`, {
+      paginateSlurp: true,
+    }) ?? [];
+  let existingId = null;
+  for (const page of pages) {
+    for (const c of page) {
+      if (c.body?.includes(SUMMARY_MARKER)) existingId = c.id;
+    }
+  }
+
+  if (existingId) {
+    ghApi(`repos/${owner}/${repo}/issues/comments/${existingId}`, {
+      method: "PATCH",
+      jsonBody: { body },
+    });
+  } else {
+    ghApi(`repos/${owner}/${repo}/issues/${prNumber}/comments`, {
+      method: "POST",
+      jsonBody: { body },
+    });
+  }
 }

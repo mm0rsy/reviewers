@@ -16,6 +16,10 @@ export function marker(id) {
   return `<!-- reviewers-finding:${id} -->`;
 }
 
+// Identifies the single summary comment so re-runs update it in place instead of
+// stacking a new one per run.
+export const SUMMARY_MARKER = "<!-- reviewers-summary -->";
+
 export function extractMarker(body) {
   const m = body?.match(/<!-- reviewers-finding:([a-f0-9]+) -->/);
   return m ? m[1] : null;
@@ -40,7 +44,8 @@ export function inlineCommentBody(f, id) {
 }
 
 export function summaryBody({ synthesis, findings, notInline, postedCount }) {
-  let body = synthesis
+  let body = SUMMARY_MARKER + "\n";
+  body += synthesis
     ? synthesis
     : `## Reviewers — ${findings.length} finding(s)\n\nNo synthesis file found; see individual reports.`;
 

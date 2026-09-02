@@ -1,9 +1,9 @@
 // GitLab provider for post-comments.mjs — shells out to `glab api`, mirroring the github.mjs
-// provider's use of `gh api`. NOTE: `glab` wasn't available to test against locally in this
-// environment (only `gh` was installed); flag usage here (`--method`, `--input -`,
-// `--paginate`) follows glab's documented gh-mirrored syntax but hasn't been runtime-verified
-// the way the GitHub provider has — treat as needing a real smoke test against a GitLab MR
-// before relying on it.
+// provider's use of `gh api`. Flag semantics verified against glab 1.116.0 hitting the real
+// gitlab.com API: `--input -` reads the body from stdin, but unlike gh it sends NO
+// Content-Type header, so GitLab rejects the request with HTTP 415 unless we pass
+// `-H "Content-Type: application/json"` explicitly. The full posting flow against a live MR
+// (auth'd POSTs landing as discussions) still needs an end-to-end smoke test.
 //
 // Env: CI_PROJECT_ID, CI_MERGE_REQUEST_IID (both set automatically by GitLab CI on
 // merge-request pipelines). Auth: export GITLAB_TOKEN (project/group access token, API
@@ -13,7 +13,7 @@
 "use strict";
 
 import { spawnSync } from "node:child_process";
-import { findingId, extractMarker, inlineCommentBody } from "../comment-format.mjs";
+import { findingId, extractMarker, inlineCommentBody, SUMMARY_MARKER } from "../comment-format.mjs";
 
 export function readEnv() {
   const { CI_PROJECT_ID, CI_MERGE_REQUEST_IID } = process.env;
@@ -30,13 +30,17 @@ function glabApi(path, { method, jsonBody } = {}) {
   // value from a single response body, parsed the same safe way regardless of pretty-print.
   const args = ["api", path];
   if (method) args.push("--method", method);
-  if (jsonBody) args.push("--input", "-");
+  // glab doesn't set a Content-Type for --input bodies (gh does) — without the explicit
+  // header GitLab responds HTTP 415 "provided content-type '' is not supported".
+  if (jsonBody) args.push("--input", "-", "-H", "Content-Type: application/json");
   const res = spawnSync("glab", args, {
     input: jsonBody ? JSON.stringify(jsonBody) : undefined,
     encoding: "utf8",
   });
   if (res.status !== 0) {
-    const err = new Error(`glab ${args.join(" ")} failed: ${res.stderr || res.stdout}`);
+    // res.error covers the binary-missing case (status is null, stderr empty).
+    const detail = res.error?.message || res.stderr || res.stdout;
+    const err = new Error(`glab ${args.join(" ")} failed: ${detail}`);
     err.status = res.status;
     throw err;
   }
@@ -85,8 +89,10 @@ export async function postAll({ projectId, mrIid }, { findings }) {
         },
       });
       postedCount++;
-    } catch {
-      // Line isn't part of the diff — folded into the summary comment instead.
+    } catch (e) {
+      // Typically the line isn't part of the diff — folded into the summary comment
+      // instead, but log why so a systemic failure (bad token, etc.) is visible.
+      console.warn(`inline comment failed for ${f.path}:${f.line} — ${e.message}`);
       failed.push(f);
     }
   }
@@ -95,8 +101,28 @@ export async function postAll({ projectId, mrIid }, { findings }) {
 }
 
 export async function postSummary({ projectId, mrIid }, body) {
-  glabApi(`projects/${projectId}/merge_requests/${mrIid}/notes`, {
-    method: "POST",
-    jsonBody: { body },
-  });
+  // Update the previous run's summary note in place (found via SUMMARY_MARKER) instead of
+  // stacking a new note per run.
+  let existingId = null;
+  for (let page = 1; ; page++) {
+    const notes = glabApi(
+      `projects/${projectId}/merge_requests/${mrIid}/notes?per_page=100&page=${page}`
+    );
+    for (const n of notes ?? []) {
+      if (n.body?.includes(SUMMARY_MARKER)) existingId = n.id;
+    }
+    if (!notes || notes.length < 100) break;
+  }
+
+  if (existingId) {
+    glabApi(`projects/${projectId}/merge_requests/${mrIid}/notes/${existingId}`, {
+      method: "PUT",
+      jsonBody: { body },
+    });
+  } else {
+    glabApi(`projects/${projectId}/merge_requests/${mrIid}/notes`, {
+      method: "POST",
+      jsonBody: { body },
+    });
+  }
 }

@@ -60,6 +60,10 @@ runs:
         PR_NUMBER: ${{ inputs.pr-number }}
         MODEL: ${{ inputs.model }}
       run: |
+        if [ -z "$PR_NUMBER" ]; then
+          echo "::error::no PR number — trigger on pull_request or pass the pr-number input"
+          exit 1
+        fi
         claude -p "/reviewers:full-review --auto $PR_NUMBER" \
           --model "$MODEL" \
           --dangerously-skip-permissions \
