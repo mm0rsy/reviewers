@@ -1,0 +1,45 @@
+name: npm-publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write # npm provenance attestation
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Guard — generated files in sync
+        run: bash scripts/sync.sh --check
+
+      - name: Guard — package.json and plugin.json versions agree
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          PKG=$(node -p "require('./package.json').version")
+          PLUGIN=$(node -p "require('./.claude-plugin/plugin.json').version")
+          if [ "$PKG" != "$PLUGIN" ]; then
+            echo "version mismatch: package.json=$PKG plugin.json=$PLUGIN" >&2
+            exit 1
+          fi
+          if [ "$EVENT_NAME" = "release" ] && [ "v$PKG" != "$RELEASE_TAG" ]; then
+            echo "version mismatch: package.json=$PKG release tag=$RELEASE_TAG" >&2
+            exit 1
+          fi
+
+      - name: Publish to npm
+        run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
