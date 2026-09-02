@@ -17,6 +17,7 @@ All settings are optional bullet points of the form `- key: value`.
 | `base`   | `auto`      | Diff base. `auto` = merge-base with the default branch; or a branch name.|
 | `parallel` | `true`    | Allow parallel reviewer dispatch on platforms that support subagents.   |
 | `depth`  | `module`    | How far up the scope ladder reviewers climb: `function` < `file` < `module` < `domain`. Higher = more thorough, slower, costlier (e.g. `domain` for release reviews). Project-level review always runs once during synthesis. |
+| `decisions` | *(none)* | Path to the team's committed **decision ledger** (settled review decisions; see `decision-ledger.md`). When set, reviewers respect settled decisions within their bounds and enforce their limits outside them. |
 
 ## Reviewer sections — `## Reviewer: <Name>`
 

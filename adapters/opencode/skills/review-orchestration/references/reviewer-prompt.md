@@ -24,6 +24,15 @@ of them as findings and cite the document and section in each such finding.
 <file content>
 }}
 
+## Settled team decisions
+*(Section omitted entirely when no decision ledger is configured or no entry binds this reviewer.)*
+The team has already settled the following (from the decision ledger). Within each entry's
+Bounds, do NOT raise findings that contradict the Decision — the matter is closed. But if the
+change extends the pattern BEYOND an entry's Bounds, that IS a finding: cite the entry ID in
+the finding's `Guideline:` field (e.g. `decisions D-003`). Ignore entries marked Superseded-by.
+
+{{relevant_decision_entries}}
+
 ## Files assigned to you
 Review ONLY the following changed files (they matched your domain's patterns). Read each
 file's full current content for context, and the diff below for what actually changed.

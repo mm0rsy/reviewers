@@ -22,6 +22,23 @@ writing, …) that review every change the same way, for every team member, on e
 No reviewers are hardcoded — the roster always comes from `review.md`, so adding a domain is
 a one-file edit, no plugin update.
 
+## The decision ledger — a review that remembers
+
+Add `- decisions: docs/review-decisions.md` to review.md's Settings and reviews gain memory.
+The ledger records **settled decisions**: trade-offs the team accepted deliberately, which
+would otherwise resurface as findings in every review. Each entry states the decision, its
+rationale, which reviewers it binds, its **bounds** (where it holds), and an optional
+revisit condition. Reviewers then stop re-raising the decided matter inside those bounds —
+and start **enforcing** them: the same pattern spreading beyond its bounds is flagged, citing
+the decision. Synthesis reports revisit conditions that appear to have been met.
+
+Entries get written by the learning loop: when you reject a finding as intentional during an
+interactive review, the orchestrator drafts the ledger entry and appends it after your
+confirmation. Unattended runs (`--auto`, CI) never amend the ledger — candidate decisions are
+only suggested in `review-results.md`. Because the ledger is a committed markdown file, every
+settled decision propagates to the whole team on every platform, reviewable in PRs like any
+other change. See `core/reference/decision-ledger.md` for the entry format.
+
 ## Install
 
 ### Claude Code

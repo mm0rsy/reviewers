@@ -6,6 +6,7 @@
 - output: .reviews/
 - base: auto
 - depth: module   # scope ladder per reviewer: function | file | module | domain
+# - decisions: docs/review-decisions.md   # optional: settled-decision ledger (see decision-ledger.md)
 
 ## Reviewer: Backend
 - files: src/**, **/*.py

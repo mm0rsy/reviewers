@@ -8,6 +8,7 @@ Reference documents (read them when the step says so — do not improvise their 
 - `{{REF_DIR}}/reviewer-prompt.md` — template for each reviewer's prompt
 - `{{REF_DIR}}/finding-format.md` — the report format every reviewer must follow
 - `{{REF_DIR}}/synthesis.md` — rules for the final review-results.md
+- `{{REF_DIR}}/decision-ledger.md` — settled-decision semantics (only when review.md links a ledger)
 
 Arguments given by the user: `$ARGUMENTS`
 - `--auto` → skip the roster confirmation (step 5) and proceed end-to-end without questions.
@@ -21,9 +22,12 @@ stop and tell the user to run `/reviewers:init` to create one (do not invent a r
 
 ## Step 2 — Parse the roster
 Read `{{REF_DIR}}/review-schema.md`, then parse review.md accordingly: global settings
-(`output`, `base`, `parallel`, `depth`) and every `## Reviewer:` section (files, guidelines,
-focus, always, severity-floor, depth, free-form prose). Note warnings (unknown keys, missing guideline
-files) — they go in the roster table, they never abort the review.
+(`output`, `base`, `parallel`, `depth`, `decisions`) and every `## Reviewer:` section (files,
+guidelines, focus, always, severity-floor, depth, free-form prose). Note warnings (unknown keys,
+missing guideline files) — they go in the roster table, they never abort the review.
+If a `decisions:` ledger is configured, read `{{REF_DIR}}/decision-ledger.md` and parse the
+ledger file's entries (skip entries marked Superseded-by; a missing ledger file is a warning,
+not an error).
 
 ## Step 3 — Determine the change set
 - Default: `git diff` against the merge-base with the default branch
@@ -65,6 +69,9 @@ reviewer, fill the template completely:
 - set the output path to `<output>/<NNN>/<reviewer-slug>.md`,
 - set the scope-ladder depth (reviewer's `depth` override, else the global `depth` setting,
   else `module`),
+- when a decision ledger is active: inline the ledger entries that bind this reviewer (its
+  name in `Binds:`, or `all`); reviewers with `always: true` receive the entire ledger.
+  Omit the template's settled-decisions section entirely when there are none,
 - append the finding-format document verbatim.
 
 Dispatch:
@@ -82,9 +89,21 @@ Read `{{REF_DIR}}/synthesis.md`, then read every report in `<output>/<NNN>/` and
 `<output>/<NNN>/review-results.md` following those rules exactly: dedup, cross-domain
 conflict/ripple/root-cause analysis, coverage gaps, the once-per-review **project-level
 pass** (`Scope: project` observations — the reviewers deliberately stop at domain level),
-and a fix plan grouped by file.
+and a fix plan grouped by file. When a decision ledger is active, synthesis also applies
+its entries (settled findings, bounds violations, met revisit conditions) per
+`{{REF_DIR}}/decision-ledger.md`.
 
 ## Step 9 — Report back
 Tell the user: the verdict, finding counts by severity, the most important cross-domain
 notes, and the paths of `review-results.md` and the individual reports. Do not fix anything —
 fixing is a separate decision that belongs to the author.
+
+## Step 10 — Learning loop (interactive only; skip entirely with --auto)
+If the author responds to findings with "that's intentional / we've decided this" (now or
+when asked whether any finding should be settled), turn each such rejection into a decision:
+draft a complete ledger entry per `{{REF_DIR}}/decision-ledger.md` (Decision, Rationale with
+origin `review <NNN>`, Binds, Bounds, Revisit-when — propose bounds narrower than
+"everywhere"), show it, and append it to the ledger file only after the author confirms.
+If no ledger is configured yet, offer to create one (default `docs/review-decisions.md`) and
+add `- decisions: <path>` to review.md's Settings. Remind the author to commit ledger
+changes — that's how the decision reaches the whole team.

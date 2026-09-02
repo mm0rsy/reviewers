@@ -18,6 +18,7 @@ questions) rely on.
 | `reviewer-prompt.md` | Composing the prompt for one dynamic domain reviewer. |
 | `finding-format.md` | Writing or validating a reviewer report (`.reviews/<NNN>/<slug>.md`). |
 | `synthesis.md` | Merging reviewer reports into `review-results.md` with cross-domain checks. |
+| `decision-ledger.md` | Reading/writing the team's settled-decision ledger (suppress within bounds, enforce beyond them, learning loop). Active only when review.md sets `decisions:`. |
 | `templates/` | Starter `## Reviewer:` sections per domain for scaffolding review.md. |
 | `templates/_custom.md` | Annotated meta-template for authoring a reviewer for ANY new domain (CAPL, Go, Rust, …) — the minimal reference `/reviewers:extend` builds on with the user. `_`-prefixed files are meta-templates, never proposed as domains. |
 
@@ -33,3 +34,7 @@ questions) rely on.
    conflicts/ripples/shared root causes, group the fix plan by file.
 5. **Platform-adaptive dispatch**: parallel subagents where a task tool exists; otherwise
    strict one-persona-per-pass sequential execution.
+6. **Settled decisions stay settled — within their bounds.** When review.md links a decision
+   ledger, bound reviewers never re-raise decided matters inside an entry's bounds, and flag
+   the decided pattern spreading beyond them. The ledger is only ever amended with the
+   author's explicit confirmation, never in unattended runs.
