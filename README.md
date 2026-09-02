@@ -24,7 +24,7 @@ a one-file edit, no plugin update.
 
 ## The decision ledger — a review that remembers
 
-Add `- decisions: docs/review-decisions.md` to review.md's Settings and reviews gain memory.
+Add `- decisions: .reviewers/decisions/` to review.md's Settings and reviews gain memory.
 The ledger records **settled decisions**: trade-offs the team accepted deliberately, which
 would otherwise resurface as findings in every review. Each entry states the decision, its
 rationale, which reviewers it binds, its **bounds** (where it holds), and an optional
@@ -32,30 +32,34 @@ revisit condition. Reviewers then stop re-raising the decided matter inside thos
 and start **enforcing** them: the same pattern spreading beyond its bounds is flagged, citing
 the decision. Synthesis reports revisit conditions that appear to have been met.
 
-Entries get written by the learning loop: when you reject a finding as intentional during an
-interactive review, the orchestrator drafts the ledger entry and appends it after your
-confirmation. Unattended runs (`--auto`, CI) never amend the ledger — candidate decisions are
-only suggested in `review-results.md`. Because the ledger is a committed markdown file, every
-settled decision propagates to the whole team on every platform, reviewable in PRs like any
-other change. See `core/reference/decision-ledger.md` for the entry format.
+The recommended layout is one `D-NNN-<slug>.md` file per decision in that directory —
+parallel branches settling decisions merge cleanly and each decision keeps its own git
+history; a single-file ledger (`decisions: docs/review-decisions.md` with `## D-NNN`
+sections) is equally supported for small teams. Entries get written by the learning loop:
+when you reject a finding as intentional during an interactive review, the orchestrator
+drafts the entry and writes it after your confirmation. Unattended runs (`--auto`, CI) never
+amend the ledger — candidate decisions are only suggested in `review-results.md`. Because the
+ledger is committed (never gitignore it — the plugin warns if you do), every settled decision
+propagates to the whole team on every platform, reviewable in PRs like any other change. See
+`core/reference/decision-ledger.md` for the entry format.
 
 ## Install
 
 ### Claude Code
 ```
-/plugin marketplace add <owner>/<repo>        # or a local clone path
+/plugin marketplace add mm0rsy/reviewers        # or a local clone path
 /plugin install reviewers@reviewers-marketplace
 ```
 
 ### GitHub Copilot CLI
 ```
-copilot plugin marketplace add <owner>/<repo>
+copilot plugin marketplace add mm0rsy/reviewers
 copilot plugin install reviewers@reviewers-marketplace
 ```
 
 ### openCode
 ```
-git clone <repo-url> && cd <repo>
+git clone https://github.com/mm0rsy/reviewers.git && cd reviewers
 scripts/install.sh --opencode [--global] [path-to-your-project]
 ```
 Commands appear as `/reviewers/full-review` and `/reviewers/init`.
