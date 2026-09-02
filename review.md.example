@@ -1,0 +1,26 @@
+# Review Configuration
+# Copy to your repo root as `review.md`, adapt, and commit it.
+# Full schema: see the plugin's review-schema.md or run /reviewers:init to generate one.
+
+## Settings
+- output: .reviews/
+- base: auto
+- depth: module   # scope ladder per reviewer: function | file | module | domain
+
+## Reviewer: Backend
+- files: src/**, **/*.py
+- guidelines: docs/python-style.md, docs/api-conventions.md
+- focus: error handling, transaction safety, API contract stability
+
+## Reviewer: DevOps
+- files: Dockerfile*, .github/workflows/**, **/*.tf
+- focus: reproducible builds, secret handling, rollback safety
+
+## Reviewer: Technical Writing
+- files: **/*.md, docs/**
+- focus: accuracy against the code, terminology consistency, clarity
+
+## Reviewer: Security
+- always: true
+- severity-floor: minor
+- focus: injection, secrets, authn/authz, unsafe deserialization

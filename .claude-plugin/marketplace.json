@@ -1,0 +1,15 @@
+{
+  "name": "reviewers-marketplace",
+  "description": "Marketplace for the reviewers plugin: review.md-driven multi-domain team code review.",
+  "owner": {
+    "name": "Mohamed Morsy",
+    "email": "mo-morsy@outlook.com"
+  },
+  "plugins": [
+    {
+      "name": "reviewers",
+      "source": "./",
+      "description": "Domain-intelligent, cross-domain team code review driven by a shared review.md contract."
+    }
+  ]
+}
