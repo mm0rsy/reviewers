@@ -74,3 +74,12 @@ jobs:
           gh release create "$TAG" \
             --title "$TAG" \
             --notes "$NOTES"
+
+      # A release created with GITHUB_TOKEN doesn't fire the `release: published` event
+      # downstream workflows normally trigger on (GitHub suppresses token-caused recursive
+      # triggers) — so dispatch npm-publish explicitly instead of relying on that event.
+      - name: Trigger npm-publish
+        if: steps.check.outputs.new == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run npm-publish.yml --ref master
