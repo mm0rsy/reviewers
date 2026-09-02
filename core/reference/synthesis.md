@@ -51,7 +51,17 @@ Actively look for interactions between reports; record each as a `## Cross-domai
    passed) and list met ones as revisit candidates — never reopen a decision yourself.
    In `--auto` runs, note rejected-looking recurring findings as *candidate* decisions for
    a human to adopt; never write the ledger unattended.
-6. **Project-level pass** — this is where `project`-scope review happens, exactly once.
+6. **Baseline application** (only when review.md configures `baseline:`; see `baseline.md`).
+   Distinct from the ledger above — a baseline entry doesn't claim a finding is acceptable,
+   only that it's already known debt. Match each collected finding against the baseline
+   (same reviewer + file + underlying issue, matched here at synthesis time — reviewers never
+   see the baseline). A match is moved out of the fix plan into `## Suppressed by baseline`
+   (finding + entry ID, never silently dropped). Unlike the ledger, this has no bounds to
+   enforce — a new instance elsewhere is an ordinary new finding, not a violation. Also check
+   for baseline entries with **no** matching finding this iteration (stale — the issue looks
+   fixed) and entries whose `Expires` date has passed; list both as candidates for a human to
+   prune or re-triage, never remove an entry yourself.
+7. **Project-level pass** — this is where `project`-scope review happens, exactly once.
    Having read every report and the full change set (and the full decision ledger when one
    is active), assess the change against the overall
    project: cross-module architecture drift, repo-wide consistency (naming, error handling,
@@ -86,28 +96,39 @@ Order the output so it reads as a work plan:
    underlying issue — title wording may differ, and line-number drift alone is never a
    mismatch. When in doubt whether two findings are the same issue, prefer NEW over a false
    PERSISTING; never invent a persistence that isn't clearly the same defect.
+   A finding suppressed by the baseline (Step 2, item 6) is excluded from these four lists —
+   it's neither resolved nor an ordinary persisting finding, it's tracked under "Suppressed
+   by baseline" (item 7 below) instead, same as ledger-settled findings are excluded here too.
 4. `## Cross-domain notes` — conflicts, ripples, shared root causes, coverage gaps.
-5. `## Project-level observations` — the once-per-review project-scope pass (Step 2, item 6).
+5. `## Project-level observations` — the once-per-review project-scope pass (Step 2, item 7).
 6. `## Settled by prior decisions` — only when a ledger is active and it applied: findings
    settled within decision bounds (with entry IDs), plus any met revisit conditions and
    `--auto` candidate decisions.
-7. `## Fix plan by file` — one subsection per file, findings ordered by severity, each entry:
+7. `## Suppressed by baseline` — only when a baseline is active and it applied: findings
+   matched to a baseline entry (with entry IDs), plus any stale or expired candidates for a
+   human to prune or re-triage. Keep this **separate** from "Settled by prior decisions" —
+   suppressed debt and settled decisions are different claims and must not be merged into
+   one list.
+8. `## Fix plan by file` — one subsection per file, findings ordered by severity, each entry:
    `[SEVERITY][scope] title (reviewers) — file:line` + merged suggested fix. When a finding is
    PERSISTING (Step 3, item 3), append `(persisting since NNN)` to its entry — NNN is the
    first-seen iteration from that step — so it's visible without cross-referencing
    "Since last review". Shared-root-cause findings appear once under
    the file where the fix belongs, with pointers from the others. Module/domain/project-scope
    items without a single natural file go in a final `### Cross-cutting` subsection.
-8. `## Positive observations` — merged from all reports (deduplicated).
-9. `## Appendix` — links to each individual reviewer report.
+9. `## Positive observations` — merged from all reports (deduplicated).
+10. `## Appendix` — links to each individual reviewer report.
 
 ## Rules
 - Never drop a finding silently: every finding from every report appears in the fix plan,
-  merged, or is explicitly listed under a cross-domain note that supersedes it. The same
+  merged, is explicitly listed under a cross-domain note that supersedes it, or is relocated
+  to "Settled by prior decisions" / "Suppressed by baseline" with its entry ID. The same
   applies across iterations: a prior finding that stops appearing is reported as Resolved or
   Not re-checked (Step 3, item 3) — never simply omitted.
 - Do not soften severities during merge; only raise (when a second reviewer confirms impact).
+  A finding suppressed by the baseline keeps its original severity in the "Suppressed by
+  baseline" list — suppression hides it from the fix plan, it does not downgrade it.
 - The synthesis adds no brand-new findings of its own — its judgments are limited to merging,
-  conflict resolution, root-cause linking, and (when a prior iteration exists) matching
-  findings across iterations. New concerns noticed during synthesis go under
-  `## Cross-domain notes` clearly marked as orchestrator observations.
+  conflict resolution, root-cause linking, and matching findings against prior iterations,
+  the decision ledger, and the baseline, when each is active. New concerns noticed during
+  synthesis go under `## Cross-domain notes` clearly marked as orchestrator observations.
