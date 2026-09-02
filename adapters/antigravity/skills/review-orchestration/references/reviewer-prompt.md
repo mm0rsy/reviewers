@@ -24,6 +24,10 @@ of them as findings and cite the document and section in each such finding.
 <file content>
 }}
 
+*(A guideline that is an ADR carrying `Proposed`/`Draft` status is wrapped as
+`### Guideline (proposed, not yet binding): <path>` — weigh it, but never cite it as a
+violation. Superseded, deprecated, and rejected ADRs are not inlined at all.)*
+
 ## Settled team decisions
 *(Section omitted entirely when no decision ledger is configured or no entry binds this reviewer.)*
 The team has already settled the following (from the decision ledger). Within each entry's
@@ -32,6 +36,15 @@ change extends the pattern BEYOND an entry's Bounds, that IS a finding: cite the
 the finding's `Guideline:` field (e.g. `decisions D-003`). Ignore entries marked Superseded-by.
 
 {{relevant_decision_entries}}
+
+## Repository map
+*(Section omitted entirely unless this reviewer sets `repo-map: true`.)*
+Structural context so you can judge where this change sits: layering, dependency direction,
+and whether it duplicates something that already exists elsewhere. It is **not** an invitation
+to review untouched code — every finding must still be anchored in your assigned changed files
+below, and you still stop at your configured depth.
+
+{{repo_map}}
 
 ## Files assigned to you
 Review ONLY the following changed files (they matched your domain's patterns). Read each

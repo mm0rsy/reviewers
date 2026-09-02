@@ -165,6 +165,28 @@ ledger is committed (never gitignore it — the plugin warns if you do), every s
 propagates to the whole team on every platform, reviewable in PRs like any other change. See
 `core/reference/decision-ledger.md` for the entry format.
 
+## Sharpening the architecture reviewer
+
+Two settings make an Architecture reviewer meaningfully better, and `/reviewers:init` offers
+both when it detects the ingredients:
+
+**Your ADRs become its guidelines.** A `guidelines:` entry may name a *directory*, so
+`guidelines: docs/adr/` inlines the team's Architecture Decision Records — the record of how
+the system is actually meant to be structured. Records marked superseded, deprecated, or
+rejected are skipped rather than enforced (defending architecture the team already abandoned is
+worse than no review), and `Proposed`/`Draft` records are passed along as informative but not
+binding. Because guideline content is inlined verbatim, init warns when a folder holds enough
+ADRs (~15+) that you'd be better off naming the ones that genuinely constrain review.
+
+**It gets a repository map.** `repo-map: true` inlines a structural map — tracked files by
+area, with the directories this change touches marked, plus any cross-module dependencies the
+diff introduces. Layering and dependency-direction findings are unreachable from a diff alone;
+this is what makes "this handler reaches straight into the database layer" a finding the
+reviewer can actually see. It stays off by default for everyone else, since a file-level
+reviewer pays the prompt cost for nothing. The map is context only — findings remain anchored
+in the changed files, and repo-wide judgment stays with synthesis. See
+`core/reference/repo-map.md`.
+
 ## Baseline — parking known debt, distinct from the ledger
 
 Add `- baseline: .reviewers/baseline.md` to review.md's Settings to suppress **specific**

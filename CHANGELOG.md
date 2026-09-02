@@ -3,6 +3,23 @@
 All notable changes to the reviewers plugin. Format follows
 [Keep a Changelog](https://keepachangelog.com/); versions follow semver.
 
+## [0.8.0] — 2026-09-03
+### Added
+- **ADRs as architecture guidelines**: a `guidelines:` entry may now name a **directory**
+  (`guidelines: docs/adr/`), inlining the `*.md` inside it. Built for Architecture Decision
+  Records: records marked superseded/deprecated/rejected are skipped rather than enforced,
+  and `Proposed`/`Draft` records are passed to the reviewer as informative but not binding.
+  Warns instead of silently truncating when a directory would inline more than ~15 documents.
+  `/reviewers:init` now detects ADR folders (`docs/adr/`, `docs/architecture/decisions/`,
+  numbered `NNNN-*.md` with status sections) and offers them for the Architecture reviewer.
+- **Repository map for reviewers that judge structure**: new per-reviewer `repo-map: true`
+  inlines a bounded structural map — tracked files by area (ignored/vendored pruned), the
+  directories the change touches marked, root manifests/entry points, and, where cheap to
+  determine, the cross-module dependencies the diff introduces. Makes layering and
+  dependency-direction findings reachable, which a diff alone cannot support. Built once per
+  review and shared by every reviewer requesting it; off by default. New
+  `core/reference/repo-map.md`; the Architecture template enables both settings.
+
 ## [0.7.0] — 2026-09-03
 ### Added
 - **Baseline**: `- baseline: .reviewers/baseline.md` in review.md's Settings parks specific
@@ -80,6 +97,7 @@ Initial public release.
 - Four platforms from one canonical core (`scripts/sync.sh`, CI drift gate): Claude Code,
   GitHub Copilot CLI, openCode, Google Antigravity; installer `scripts/install.sh`.
 
+[0.8.0]: https://github.com/mm0rsy/reviewers/releases/tag/v0.8.0
 [0.7.0]: https://github.com/mm0rsy/reviewers/releases/tag/v0.7.0
 [0.6.0]: https://github.com/mm0rsy/reviewers/releases/tag/v0.6.0
 [0.5.0]: https://github.com/mm0rsy/reviewers/releases/tag/v0.5.0

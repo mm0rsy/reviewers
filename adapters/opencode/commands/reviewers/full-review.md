@@ -12,6 +12,7 @@ Reference documents (read them when the step says so — do not improvise their 
 - `.opencode/skills/review-orchestration/references/reviewer-prompt.md` — template for each reviewer's prompt
 - `.opencode/skills/review-orchestration/references/finding-format.md` — the report format every reviewer must follow
 - `.opencode/skills/review-orchestration/references/synthesis.md` — rules for the final review-results.md
+- `.opencode/skills/review-orchestration/references/repo-map.md` — how to build the structural map (only when a reviewer sets `repo-map: true`)
 - `.opencode/skills/review-orchestration/references/decision-ledger.md` — settled-decision semantics (only when review.md links a ledger)
 - `.opencode/skills/review-orchestration/references/baseline.md` — acknowledged-debt suppression semantics (only when review.md links a baseline)
 
@@ -28,8 +29,11 @@ stop and tell the user to run `/reviewers:init` to create one (do not invent a r
 ## Step 2 — Parse the roster
 Read `.opencode/skills/review-orchestration/references/review-schema.md`, then parse review.md accordingly: global settings
 (`output`, `base`, `parallel`, `depth`, `decisions`, `baseline`) and every `## Reviewer:` section (files,
-guidelines, focus, always, severity-floor, depth, free-form prose). Note warnings (unknown keys,
+guidelines, focus, always, severity-floor, depth, repo-map, free-form prose). Note warnings (unknown keys,
 missing guideline files) — they go in the roster table, they never abort the review.
+A `guidelines` entry naming a directory expands to the `*.md` files directly inside it, sorted
+— skipping superseded/deprecated/rejected ADRs and warning when more than ~15 in-force
+documents would be inlined, per `.opencode/skills/review-orchestration/references/review-schema.md`.
 If a `decisions:` ledger is configured, read `.opencode/skills/review-orchestration/references/decision-ledger.md` and load the
 entries — from every `D-*.md` file when the path is a directory, or from the single file's
 `## D-` sections otherwise (skip entries marked Superseded-by; a missing path is a warning,
@@ -76,9 +80,18 @@ Suggest adding the output root to `.gitignore` if it isn't ignored and isn't alr
 committed (teams may choose to commit reviews — respect the status quo).
 
 ## Step 7 — Dispatch the reviewers
-Read `.opencode/skills/review-orchestration/references/reviewer-prompt.md` and `.opencode/skills/review-orchestration/references/finding-format.md`. For each active
-reviewer, fill the template completely:
-- inline the full content of each existing guideline file,
+Read `.opencode/skills/review-orchestration/references/reviewer-prompt.md` and `.opencode/skills/review-orchestration/references/finding-format.md`.
+
+If any active reviewer sets `repo-map: true`, build the repository map **once** per
+`.opencode/skills/review-orchestration/references/repo-map.md` and give the same map to every reviewer that asked for it — never
+rebuild it per reviewer. If no active reviewer requests it, skip the work entirely.
+
+For each active reviewer, fill the template completely:
+- inline the full content of each existing guideline file (expanding guideline directories and
+  applying ADR status rules as parsed in Step 2; mark `Proposed`/`Draft` ADRs as not yet
+  binding),
+- when this reviewer sets `repo-map: true`: inline the map built above; otherwise omit the
+  template's repository-map section entirely,
 - list the assigned files and include the diff restricted to them (always-reviewers get the full diff),
 - set the output path to `<output>/<NNN>/<reviewer-slug>.md`,
 - set the scope-ladder depth (reviewer's `depth` override, else the global `depth` setting,
