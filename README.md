@@ -1,5 +1,8 @@
 # Reviewers — review.md-driven multi-domain code review
 
+[![sync-check](https://github.com/mm0rsy/reviewers/actions/workflows/sync-check.yml/badge.svg)](https://github.com/mm0rsy/reviewers/actions/workflows/sync-check.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 One plugin, four platforms: **Claude Code**, **GitHub Copilot CLI**, **Google Antigravity**,
 and **openCode**. Your team commits a single `review.md` to each repository; the plugin turns
 it into a panel of domain reviewers (backend, frontend, devops, embedded, testing, technical
@@ -21,6 +24,10 @@ writing, …) that review every change the same way, for every team member, on e
 
 No reviewers are hardcoded — the roster always comes from `review.md`, so adding a domain is
 a one-file edit, no plugin update.
+
+**See it before installing it:** [`examples/`](examples/) holds one complete, genuine review —
+the contract, a decision ledger, an individual reviewer report, and the synthesized
+`review-results.md` with cross-domain notes and settled-decision handling.
 
 ## The decision ledger — a review that remembers
 
@@ -110,3 +117,8 @@ See `review.md.example` for a starter contract and
 
 Edit files under `core/` (or `skills/review-orchestration/SKILL.md` / `scripts/headers/`),
 run `scripts/sync.sh`, and commit the regenerated output together with your change.
+
+## License
+
+[Apache-2.0](LICENSE) — © Mohamed Morsy. The `reviewers` name is not licensed for use on
+derivative works (Apache-2.0 §6).

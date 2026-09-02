@@ -6,6 +6,7 @@
     "name": "Mohamed Morsy",
     "email": "mo-morsy@outlook.com"
   },
+  "license": "Apache-2.0",
   "homepage": "https://github.com/mm0rsy/reviewers",
   "repository": "https://github.com/mm0rsy/reviewers",
   "keywords": ["code-review", "multi-agent", "team-standards", "review.md"]
