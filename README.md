@@ -70,6 +70,20 @@ reading all reports against each other and the decision ledger. The full run is 
 [`examples/`](examples/): the `review.md` contract, the ledger entries, an individual
 reviewer report, and the complete `review-results.md` with the per-file fix plan.
 
+## Benchmark
+
+[`benchmark/`](benchmark/) is a small fixture repo with **15 deliberately planted issues**
+across three domains, a ground-truth manifest written *before* any review ran, and the
+unedited output of a real `--auto` run scored against it:
+
+| | |
+|---|---|
+| Detection | **15/15 (100%)** — every planted issue surfaced somewhere in the output |
+| Exact severity match | 8/15 — the rest were rated lower than expected, never higher, and there were no false positives |
+| Cross-domain links | Caught both the shared-secret and rename-ripple relationships without being told to look for them |
+
+Full scoring, methodology, and the raw reviewer reports: [`benchmark/RESULTS.md`](benchmark/RESULTS.md).
+
 ## The decision ledger — a review that remembers
 
 Add `- decisions: .reviewers/decisions/` to review.md's Settings and reviews gain memory.
