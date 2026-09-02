@@ -4,6 +4,10 @@
 [![sync-check](https://github.com/mm0rsy/reviewers/actions/workflows/sync-check.yml/badge.svg)](https://github.com/mm0rsy/reviewers/actions/workflows/sync-check.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
+![reviewers demo — contract, roster, parallel reviewers, cross-domain synthesis](assets/demo.gif)
+*Replay of a real `--auto` run on the [`examples/`](examples/) sample repo — all review text
+is verbatim model output; only the pacing is scripted for the recording.*
+
 One plugin, four platforms: **Claude Code**, **GitHub Copilot CLI**, **Google Antigravity**,
 and **openCode**. Your team commits a single `review.md` to each repository; the plugin turns
 it into a panel of domain reviewers (backend, frontend, devops, embedded, testing, technical
