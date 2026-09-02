@@ -84,6 +84,62 @@ unedited output of a real `--auto` run scored against it:
 
 Full scoring, methodology, and the raw reviewer reports: [`benchmark/RESULTS.md`](benchmark/RESULTS.md).
 
+## PR/MR integration — findings where the team already looks
+
+Run `/reviewers:full-review --auto` in CI and get findings posted as **inline PR/MR review
+comments**, plus a severity gate that fails the job on `CRITICAL` (configurable). Supported on
+both GitHub and GitLab, built on `gh`/`glab` — the same CLIs `full-review` already uses for
+diff fetching, so no hand-rolled HTTP/auth layer.
+
+Each inline comment carries a hidden identity marker (hashed from reviewer + file + line +
+title), so re-running the workflow on a new push never re-posts a finding that's still open —
+only genuinely new findings get commented.
+
+### GitHub Actions
+
+```yaml
+# .github/workflows/reviewers.yml
+on: pull_request
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mm0rsy/reviewers@main
+        with:
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          fail-on: critical   # critical | major | minor | none
+```
+
+See [`action.yml`](action.yml) for every input (`model`, `post-comments`, `pr-number`,
+`github-token`).
+
+### GitLab CI
+
+```yaml
+# .gitlab-ci.yml
+include:
+  - remote: 'https://raw.githubusercontent.com/mm0rsy/reviewers/main/gitlab/reviewers.gitlab-ci.yml'
+
+reviewers:
+  extends: .reviewers
+  rules:
+    - if: $CI_MERGE_REQUEST_IID
+```
+
+**Prerequisite**: your job image must provide the [`glab` CLI](https://gitlab.com/gitlab-org/cli#installation)
+(e.g. `apk add glab` on Alpine-based images) — the job checks for it and fails fast with
+instructions if it's missing, rather than installing tools on your behalf.
+
+Set `ANTHROPIC_API_KEY` and `GITLAB_TOKEN` (a project/group access token with `api` scope —
+not `CI_JOB_TOKEN`, whose MR-discussion permissions are inconsistent across GitLab
+versions/settings) as CI/CD variables. See
+[`gitlab/reviewers.gitlab-ci.yml`](gitlab/reviewers.gitlab-ci.yml) for the full variable list
+(`REVIEWERS_FAIL_ON`, `REVIEWERS_MODEL`, `REVIEWERS_POST_COMMENTS`, `REVIEWERS_REF`).
+
 ## The decision ledger — a review that remembers
 
 Add `- decisions: .reviewers/decisions/` to review.md's Settings and reviews gain memory.
