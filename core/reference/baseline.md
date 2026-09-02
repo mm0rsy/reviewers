@@ -50,7 +50,7 @@ One `## B-NNN` section per suppressed finding, IDs never reused:
 | `Finding` | yes | Identity of the suppressed finding: reviewer, file, and title/description close enough to re-match it later. Not the line number — code moves. |
 | `Severity` | yes | The finding's severity when baselined, carried for reporting even while suppressed. |
 | `Reason` | yes | Why it isn't being fixed now — a ticket reference, a scheduling note, a "not worth it yet." No rationale for *why it's acceptable* is required — unlike the ledger, the baseline doesn't claim the debt is fine, only that it's known. |
-| `Expires` | no | A date or condition prompting re-triage. Omit or `never` for indefinite debt. Unlike `Revisit-when`, nothing reopens automatically — this only surfaces as a synthesis reminder to re-look. |
+| `Expires` | no | A date (`YYYY-MM-DD`) prompting re-triage, or `never`/omitted for indefinite debt. A date only — free-form conditions belong in the ledger's `Revisit-when`, which synthesis evaluates; this is compared against today's date and nothing else. Nothing reopens automatically either way — an expired entry stays suppressed and is merely flagged for a re-look. |
 
 Free-form prose after the bullets is allowed and passed along verbatim.
 
@@ -67,11 +67,16 @@ Free-form prose after the bullets is allowed and passed along verbatim.
 3. **Suppressed findings are never dropped, only relocated.** A matched finding is pulled out
    of the fix plan and listed under `## Suppressed by baseline` instead, with its entry ID —
    satisfying the "never drop a finding silently" rule the same way the decision ledger does.
-4. **Staleness check.** Baseline entries with no matching finding this iteration (the
-   underlying issue appears to be gone) are reported as **stale candidates** — a prompt for a
-   human to prune the entry, never removed automatically.
-5. **Expiry check.** Entries whose `Expires` date has passed are reported alongside stale
-   candidates, as due for re-triage — still suppressed this run, just flagged.
+4. **Staleness check — only for entries actually re-checked.** An entry is a **stale candidate**
+   (a prompt for a human to prune it, never removed automatically) only when its issue was
+   genuinely looked for and not found: the entry's file is in this iteration's change set *and*
+   its reviewer is active, yet nothing matched. Reviews are diff-scoped, so on any given run
+   most entries point at files nobody reviewed — those are simply not re-checked and carry
+   forward silently. Flagging them would be the same mistake as calling an unreviewed prior
+   finding "resolved" (`synthesis.md` Step 3), and it would push teams to prune live debt.
+5. **Expiry check.** Entries whose `Expires` date is in the past are reported alongside stale
+   candidates, as due for re-triage — still suppressed this run, just flagged. Read today's
+   date from the system (e.g. `date +%F`) rather than assuming it.
 6. **No bounds enforcement.** Unlike the ledger, a baseline entry says nothing about other
    instances of the same issue — those are ordinary new findings, reported normally.
 

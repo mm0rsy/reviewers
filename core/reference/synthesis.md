@@ -57,10 +57,16 @@ Actively look for interactions between reports; record each as a `## Cross-domai
    (same reviewer + file + underlying issue, matched here at synthesis time — reviewers never
    see the baseline). A match is moved out of the fix plan into `## Suppressed by baseline`
    (finding + entry ID, never silently dropped). Unlike the ledger, this has no bounds to
-   enforce — a new instance elsewhere is an ordinary new finding, not a violation. Also check
-   for baseline entries with **no** matching finding this iteration (stale — the issue looks
-   fixed) and entries whose `Expires` date has passed; list both as candidates for a human to
-   prune or re-triage, never remove an entry yourself.
+   enforce — a new instance elsewhere is an ordinary new finding, not a violation. Also flag,
+   as candidates for a human to prune or re-triage (never remove an entry yourself):
+   - **stale** — an entry whose issue was genuinely **re-checked and not found**: its file is in
+     this iteration's change set *and* its reviewer is active, yet no finding matched. An entry
+     whose file wasn't reviewed this iteration is simply not re-checked — carry it forward
+     silently, never call it stale. Reviews are diff-scoped, so most entries fall here on any
+     given run; flagging those would prompt humans to prune debt that still exists.
+   - **expired** — an entry whose `Expires` date is in the past. Read today's date from the
+     system (e.g. `date +%F`), never from assumption. Expired entries are still suppressed this
+     run, just flagged for re-triage.
 7. **Project-level pass** — this is where `project`-scope review happens, exactly once.
    Having read every report and the full change set (and the full decision ledger when one
    is active), assess the change against the overall
@@ -99,6 +105,9 @@ Order the output so it reads as a work plan:
    A finding suppressed by the baseline (Step 2, item 6) is excluded from these four lists —
    it's neither resolved nor an ordinary persisting finding, it's tracked under "Suppressed
    by baseline" (item 7 below) instead, same as ledger-settled findings are excluded here too.
+   When such a finding was open in the prior baseline (it got baselined between iterations),
+   mark it `newly baselined since NNN` in that section — otherwise it looks like it silently
+   disappeared, and suppressing debt must never read as progress.
 4. `## Cross-domain notes` — conflicts, ripples, shared root causes, coverage gaps.
 5. `## Project-level observations` — the once-per-review project-scope pass (Step 2, item 7).
 6. `## Settled by prior decisions` — only when a ledger is active and it applied: findings

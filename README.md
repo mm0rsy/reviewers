@@ -174,8 +174,9 @@ bounds); a baseline entry says only "this instance is known debt, stop repeating
 judgment that it's acceptable, and no coverage of other instances of the same issue elsewhere.
 Baseline entries are never shown to reviewers — they report everything they find, and
 suppression happens only during synthesis, so raw findings stay complete. Suppressed findings
-move to a `## Suppressed by baseline` section (never silently dropped), and entries whose
-finding no longer reproduces get flagged as stale, so the baseline doesn't quietly rot. Like
+move to a `## Suppressed by baseline` section (never silently dropped), and entries whose finding
+was re-checked and no longer reproduces get flagged as stale, so the baseline doesn't quietly rot
+(an entry whose file simply wasn't in the diff is never mistaken for fixed). Like
 the ledger, entries are written by the learning loop — but from a different acknowledgment
 ("known issue, not fixing now" rather than "that's intentional"). See
 `core/reference/baseline.md` for the entry format and the full comparison with the ledger.

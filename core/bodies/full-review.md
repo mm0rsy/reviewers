@@ -31,8 +31,11 @@ entries — from every `D-*.md` file when the path is a directory, or from the s
 `## D-` sections otherwise (skip entries marked Superseded-by; a missing path is a warning,
 not an error). Warn prominently if the ledger path is matched by .gitignore — an ignored
 ledger is personal, not team, memory.
-If a `baseline:` is configured, read `{{REF_DIR}}/baseline.md` and load its `## B-` entries
-from the single file. Same .gitignore warning applies. Unlike the ledger, baseline entries
+If a `baseline:` is configured, read `{{REF_DIR}}/baseline.md` for the semantics, then load the
+`## B-` entries from **the file at the configured `baseline:` path** — never from the reference
+document itself, which contains an illustrative `## B-003` example that is not a real entry
+(the same caution applies to the ledger's `## D-003` example). A missing path is a warning, not
+an error. Same .gitignore warning applies. Unlike the ledger, baseline entries
 are **not** distributed to reviewers in Step 7 — they're applied only during synthesis
 (Step 8), so hold them for that step rather than the roster build below.
 

@@ -10,9 +10,11 @@ All notable changes to the reviewers plugin. Format follows
   claims a finding is known debt, not that it's acceptable, and covers only that one instance
   (no bounds enforcement, no coverage of other instances of the same issue). Applied only
   during synthesis; reviewers never see it. Suppressed findings move to a new
-  `## Suppressed by baseline` section instead of being dropped; entries with no matching
-  finding this iteration are flagged stale for pruning, and `Expires` dates flagged for
-  re-triage. Learning loop (full-review Step 10) now distinguishes "that's intentional"
+  `## Suppressed by baseline` section instead of being dropped; entries whose finding was
+  re-checked (file in the change set, reviewer active) and no longer reproduces are flagged
+  stale for pruning — entries whose file wasn't reviewed are never mistaken for fixed — and
+  past-due `Expires` dates are flagged for re-triage. Learning loop (full-review Step 10)
+  now distinguishes "that's intentional"
   (ledger) from "known issue, not fixing now" (baseline). New
   `core/reference/baseline.md`; `core/reference/review-schema.md`,
   `core/reference/synthesis.md`, `core/bodies/{full-review,init}.md` updated.
