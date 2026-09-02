@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: write
+  actions: write   # required to dispatch npm-publish.yml via `gh workflow run`
 
 jobs:
   tag-and-release:
