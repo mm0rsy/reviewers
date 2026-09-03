@@ -17,16 +17,19 @@ Focus areas (prioritize in this order): {{focus_list}}
 
 ## Team guidelines you must enforce
 The following documents are the team's binding conventions for your domain. Treat violations
-of them as findings and cite the document and section in each such finding.
+of them as findings and cite the document and section in each such finding — with one
+exception, marked inline where it applies: a document headed
+`### Guideline (proposed, not yet binding)` is an ADR the team has drafted but not adopted.
+Let it inform your judgment, but never cite it as a violation.
 
 {{inlined_guideline_contents — each wrapped as:
 ### Guideline: <path>
 <file content>
 }}
 
-*(A guideline that is an ADR carrying `Proposed`/`Draft` status is wrapped as
-`### Guideline (proposed, not yet binding): <path>` — weigh it, but never cite it as a
-violation. Superseded, deprecated, and rejected ADRs are not inlined at all.)*
+*(Orchestrator note: ADRs with `Proposed`/`Draft` status use the
+`### Guideline (proposed, not yet binding): <path>` heading. Superseded, deprecated, and
+rejected ADRs are not inlined at all.)*
 
 ## Settled team decisions
 *(Section omitted entirely when no decision ledger is configured or no entry binds this reviewer.)*

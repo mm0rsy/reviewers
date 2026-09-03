@@ -51,6 +51,11 @@ Ask the user (briefly, in one round if possible):
   actually constrain day-to-day review, since every one is inlined verbatim into the prompt.
   Don't enable it silently — ADRs sometimes describe aspirations the codebase hasn't reached,
   and enforcing those as binding produces noise the team will resent.
+- If the Architecture reviewer is in the roster, say that it ships with `repo-map: true` (the
+  template's default) and what that buys: a structural map of the repo in its prompt, which is
+  what makes layering and dependency-direction findings possible at all. Note the cost — a
+  larger prompt for that reviewer — and offer to turn it off. Don't leave it as a silent
+  default the team discovers later in their token bill.
 - Whether reviews should be committed or ignored (offer to add `.reviews/` to .gitignore).
 - Whether to enable the **decision ledger** (`decisions: .reviewers/decisions/` — see
   `{{REF_DIR}}/decision-ledger.md`): a committed record of settled review decisions that

@@ -32,9 +32,17 @@ masquerading as directories in the map. Then:
   structure* the change lands and which boundaries it straddles.
 - **List root-level manifests and entry points** (`package.json`, `pyproject.toml`, `go.mod`,
   `Dockerfile`, `main.*`, `cmd/`, `src/index.*`) — they tell the reviewer how the thing is
-  built and where it starts.
+  built and where it starts. These come from the command's `(root)` bucket, which is rendered
+  as a `Root:` line rather than as a directory row.
 - **Name each directory's role** in a few words when it is evident from its contents; leave it
   blank rather than guessing. A wrong label is worse than no label.
+
+When the review targets a PR/MR fetched with `gh`/`glab` rather than the local branch
+(`full-review.md` Step 3), `git ls-files` still describes **the tree currently checked out**,
+not the PR's. Structure rarely diverges enough to matter, and the change-set markers stay
+correct because they are path-based — but say so in the map's header line rather than implying
+it mirrors the PR, and don't let a reviewer conclude a directory is missing when it was merely
+added on a branch you don't have.
 
 Keep the whole map under roughly 60 lines. If the repo is larger, collapse depth 3 into
 `(N subdirectories)` summaries and keep depth 1–2 complete — breadth beats depth here, since

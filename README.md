@@ -167,8 +167,9 @@ propagates to the whole team on every platform, reviewable in PRs like any other
 
 ## Sharpening the architecture reviewer
 
-Two settings make an Architecture reviewer meaningfully better, and `/reviewers:init` offers
-both when it detects the ingredients:
+Two settings make an Architecture reviewer meaningfully better. `/reviewers:init` offers the
+first when it finds ADRs in the repo; the second ships enabled in the Architecture template,
+and init tells you it's on so you can weigh the cost:
 
 **Your ADRs become its guidelines.** A `guidelines:` entry may name a *directory*, so
 `guidelines: docs/adr/` inlines the team's Architecture Decision Records — the record of how
