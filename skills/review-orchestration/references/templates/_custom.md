@@ -11,6 +11,7 @@ be extended by the team as needed — this is a floor, not a ceiling.
      matches files before committing; wrong globs = reviewer never activates. -->
 - files: <globs, comma-separated>
 <!-- guidelines: repo-relative docs whose content is enforced VERBATIM during review.
+     A path may also be a directory (all *.md directly inside it, e.g. docs/adr/).
      Prefer one starter doc per domain (e.g. docs/<domain>-guidelines.md) containing:
      naming conventions, forbidden constructs, required patterns, tooling rules.
      /reviewers:extend can draft this doc with you. -->
@@ -20,7 +21,8 @@ be extended by the team as needed — this is a floor, not a ceiling.
      "goroutine leaks on early return", "unwrap() outside tests"). -->
 - focus: <area 1>, <area 2>, <area 3>
 <!-- Optional keys: always: true (run on every review) · severity-floor: minor ·
-     depth: domain (override the global scope-ladder depth) -->
+     depth: domain (override the global scope-ladder depth) · repo-map: true (inline a
+     structural map of the repo — only for domains judging layering/dependency direction) -->
 
 <!-- Free-form prose below the bullets is passed to the reviewer verbatim. Use it for
      constraints the keys can't express: target hardware, protocol versions, legacy

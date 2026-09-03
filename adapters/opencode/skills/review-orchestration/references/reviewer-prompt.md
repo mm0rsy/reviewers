@@ -17,12 +17,19 @@ Focus areas (prioritize in this order): {{focus_list}}
 
 ## Team guidelines you must enforce
 The following documents are the team's binding conventions for your domain. Treat violations
-of them as findings and cite the document and section in each such finding.
+of them as findings and cite the document and section in each such finding — with one
+exception, marked inline where it applies: a document headed
+`### Guideline (proposed, not yet binding)` is an ADR the team has drafted but not adopted.
+Let it inform your judgment, but never cite it as a violation.
 
 {{inlined_guideline_contents — each wrapped as:
 ### Guideline: <path>
 <file content>
 }}
+
+*(Orchestrator note: ADRs with `Proposed`/`Draft` status use the
+`### Guideline (proposed, not yet binding): <path>` heading. Superseded, deprecated, and
+rejected ADRs are not inlined at all.)*
 
 ## Settled team decisions
 *(Section omitted entirely when no decision ledger is configured or no entry binds this reviewer.)*
@@ -32,6 +39,15 @@ change extends the pattern BEYOND an entry's Bounds, that IS a finding: cite the
 the finding's `Guideline:` field (e.g. `decisions D-003`). Ignore entries marked Superseded-by.
 
 {{relevant_decision_entries}}
+
+## Repository map
+*(Section omitted entirely unless this reviewer sets `repo-map: true`.)*
+Structural context so you can judge where this change sits: layering, dependency direction,
+and whether it duplicates something that already exists elsewhere. It is **not** an invitation
+to review untouched code — every finding must still be anchored in your assigned changed files
+below, and you still stop at your configured depth.
+
+{{repo_map}}
 
 ## Files assigned to you
 Review ONLY the following changed files (they matched your domain's patterns). Read each

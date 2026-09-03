@@ -1,6 +1,6 @@
 {
   "name": "reviewers",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Domain-intelligent, cross-domain team code review driven by a shared review.md contract. Dynamic reviewer roster per domain/file-type, per-reviewer reports, and a cross-domain synthesized review-results.md.",
   "author": {
     "name": "Mohamed Morsy",

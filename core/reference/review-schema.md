@@ -28,15 +28,45 @@ Each section defines one reviewer. `<Name>` is the human-readable name; its slug
 | Key          | Required | Meaning |
 |--------------|----------|---------|
 | `files`      | yes*     | Comma-separated glob patterns. A reviewer is activated when any changed file matches. `*` not required if `always: true`. |
-| `guidelines` | no       | Comma-separated paths to team guideline/convention documents. Their **content is inlined into the reviewer's prompt** — this is how naming conventions and coding standards are enforced. |
+| `guidelines` | no       | Comma-separated paths to team guideline/convention documents, each a file **or a directory** (all `*.md` directly inside it, sorted by name — typical for an ADR folder). Their **content is inlined into the reviewer's prompt** — this is how naming conventions and coding standards are enforced. See *Guideline directories and ADRs* below. |
 | `focus`      | no       | Comma-separated focus areas the reviewer must prioritize. |
 | `always`     | no       | `true` = reviewer runs on every review regardless of file matching (typical for cross-cutting concerns: security, architecture, validation). |
 | `severity-floor` | no   | Minimum severity to report (`info`, `minor`, `major`, `critical`). Default: `info`. |
 | `depth`      | no       | Per-reviewer override of the global `depth` setting. |
+| `repo-map`   | no       | `true` = inline a structural map of the repository into this reviewer's prompt (see `repo-map.md`). Off by default; worth enabling for reviewers judging layering and dependency direction (Architecture, sometimes Security), pointless for narrow file-level domains. |
 
 Free-form prose inside a reviewer section (outside the bullet list) is passed to the
 reviewer verbatim as additional instructions — use it for team-specific lore that doesn't
 fit a key.
+
+## Guideline directories and ADRs
+
+A `guidelines` entry naming a directory inlines every `*.md` directly inside it (not
+recursively), sorted by filename. This exists mainly for **Architecture Decision Records** —
+`docs/adr/`, `docs/architecture/decisions/`, and friends — where the team's architectural
+intent lives across many numbered files rather than one document.
+
+Two rules apply when inlining a directory of ADRs:
+
+- **Respect ADR status.** Skip any document whose status marks it as no longer in force —
+  `Superseded`, `Deprecated`, `Rejected`, `Obsolete` (matched case-insensitively in a
+  `Status:` line, a `## Status` section, or MADR front-matter `status:`). Enforcing a
+  superseded ADR makes the reviewer defend architecture the team already abandoned. A
+  `Proposed`/`Draft` ADR is not yet binding either: inline it, but tell the reviewer it is
+  proposed, so it informs judgment without being cited as a violation. Documents with no
+  detectable status are treated as in force — most real ADRs record status only in prose, and
+  dropping every unparseable one would quietly gut the guideline set. The cost is that a
+  superseded ADR written without a status marker still gets enforced; when that happens, name
+  the binding ADRs individually instead of the directory.
+- **Watch the volume.** Guideline content is inlined verbatim, so a directory of 60 ADRs is
+  60 documents in one prompt. When a directory yields more than ~15 in-force documents, warn
+  in the roster table and suggest either naming the specific ADRs that bind this reviewer, or
+  splitting the ADRs the review should enforce into their own folder. Never silently truncate
+  the set — a half-loaded guideline set enforces a fiction.
+
+ADRs are the team's own architecture documentation and are read **only** here, as guidelines.
+They are unrelated to the `decisions` ledger (review memory, written by the learning loop) and
+to the `baseline` (known debt). A team may use any combination.
 
 ## Example
 
@@ -62,6 +92,13 @@ We target a Cortex-M0 with 16KB RAM; treat any heap allocation as a finding.
 ## Reviewer: Technical Writing
 - files: **/*.md, docs/**
 - focus: clarity, terminology consistency, audience fit
+
+## Reviewer: Architecture
+- always: true
+- depth: domain
+- repo-map: true
+- guidelines: docs/adr/
+- focus: cross-module boundaries and layering, dependency direction, API surface evolution
 
 ## Reviewer: Security
 - always: true

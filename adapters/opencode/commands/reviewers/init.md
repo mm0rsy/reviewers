@@ -26,6 +26,12 @@ Detect the stack cheaply (listings and manifest files, not full reads):
 - Tests: test/tests directories, test frameworks in manifests.
 - Existing conventions: CONTRIBUTING.md, style guides, lint configs (.eslintrc, ruff/flake8,
   .clang-format, .editorconfig) — these are candidate `guidelines:` links.
+- **Architecture Decision Records**: look for `docs/adr/`, `docs/architecture/decisions/`,
+  `doc/adr/`, `adr/`, `docs/decisions/`, or any directory of numbered `NNNN-*.md` files with
+  `Status:`/`## Status` sections. Count how many are in force vs superseded/deprecated/rejected
+  (don't read them all — the filenames and a status grep are enough at this stage). ADRs are
+  the strongest possible `guidelines:` for an Architecture reviewer: they are the team's own
+  record of how the system is meant to be structured.
 
 ## Step 3 — Propose a roster
 Map findings to domain templates from `.opencode/skills/review-orchestration/references/templates/` (backend, frontend, devops,
@@ -42,6 +48,18 @@ Ask the user (briefly, in one round if possible):
 - Which proposed reviewers to keep/drop, and any missing domains.
 - Where their coding guidelines / naming convention docs live (offer the candidates found in
   step 2), noting that linked guideline content is enforced verbatim during reviews.
+- If ADRs were found and an Architecture reviewer is in the roster, **offer the ADR directory
+  as its `guidelines:`** (`guidelines: docs/adr/` — a directory entry expands to the `*.md`
+  inside it). Say how many in-force records that inlines and that superseded ones are skipped
+  automatically. If the count is large (~15+), offer instead to list only the ADRs that
+  actually constrain day-to-day review, since every one is inlined verbatim into the prompt.
+  Don't enable it silently — ADRs sometimes describe aspirations the codebase hasn't reached,
+  and enforcing those as binding produces noise the team will resent.
+- If the Architecture reviewer is in the roster, say that it ships with `repo-map: true` (the
+  template's default) and what that buys: a structural map of the repo in its prompt, which is
+  what makes layering and dependency-direction findings possible at all. Note the cost — a
+  larger prompt for that reviewer — and offer to turn it off. Don't leave it as a silent
+  default the team discovers later in their token bill.
 - Whether reviews should be committed or ignored (offer to add `.reviews/` to .gitignore).
 - Whether to enable the **decision ledger** (`decisions: .reviewers/decisions/` — see
   `.opencode/skills/review-orchestration/references/decision-ledger.md`): a committed record of settled review decisions that
